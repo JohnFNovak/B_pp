@@ -113,3 +113,15 @@ File replacement can be very usefull when defining iterables. I often have lists
 
 ####Order of operations and multiple passes
 The order in which things are processed is: file expansion, iterables, then reference replacement. Multiple passes are teken when processing a template, so it is possible to do creative things like use references in defining iterables. Currently the preprocessor take five passes, althougth this could be set as an option in GUIDE section. Priorites are set with '!'s. The more '!'s there are in front of it, the more important it is. Because the current max depth is five, the most '!'s you can use is four. No '!'s is lowest priority, so using '!' is entrirely optional. The '!' should be placed before the '@' bookends.
+
+###EXAMPLE USE
+
+I have included an example of a B template, and what you should get from it. This is an example taken directly from my work (sort of, I had to find something where I could make it public). The template is "Display.B.cpp".
+
+To use the preprocessor:
+> python B\_pp.py Display.B.cpp
+
+or make B\_pp.py executable and run
+> ./B\_pp.py Display.B.cpp
+
+It will generate a file "Display.cpp", which can be checked against "Correct\_Display.cpp". There are a handful of other files lying around, and these are all used in the "Display.B.cpp" template.
