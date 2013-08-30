@@ -43,66 +43,66 @@ This is part of the template which turns into your code.
 
 #####@@ITERABLES
 This is the main meat and potatoes of the pre-processor. Iterables are list of sets of strings. Each iterable should be given in the form:
->@IterableName(prop1,prop2,prop3...):
->string1-1 string1-2 string1-3 ...
->string2-1 string2-2 string2-3 ...
->...
->stringN-1 stringN-2 stringN-3 ...
+>@IterableName(prop1,prop2,prop3...):<br />
+>string1-1 string1-2 string1-3 ...<br />
+>string2-1 string2-2 string2-3 ...<br />
+>...<br />
+>stringN-1 stringN-2 stringN-3 ...<br />
 The list of properties in parentheses after the iterable name can be arbitrarily long. When an iterable is used in the TEMPLATE section, one of the properties needs to always be specified by following the iterable name with a period and the property name. Ex: "@IterableName.prop2@". Note the '@' bookends. When an iterable is used, the line it is used in will be repeated as many times as there are items in the iterable. If the same iterable is used more than once in the same line, every instance of the iterable is replaced at the same time. 
 
 As an example. If I define an iterable:
->@Counting(Name,Value):
->A 1
->B 2
->C 3
+>@Counting(Name,Value):<br />
+>A 1<br />
+>B 2<br />
+>C 3<br />
 
 And then I use it in the template:
->int @Counting.Name@ = @Counting.Value@;
+>int @Counting.Name@ = @Counting.Value@;<br />
 
-It will render as"
->int A = 1;
->int B = 2;
->int C = 3;
+It will render as:
+>int A = 1;<br />
+>int B = 2;<br />
+>int C = 3;<br />
 
 There is also a special iterable '@i@', which will be replaced with the count of the iteration. So the above example could have been done as:
 >Define iterable:
->>@Counting(Name):
->>A
->>B
->>C
->Use it:
->>int @Counting.name@ = @i@;
+>>@Counting(Name):<br />
+>>A<br />
+>>B<br />
+>>C<br />
+>Use it:<br />
+>>int @Counting.name@ = @i@;<br />
 
 #####@@FORMS
 This actually isn't implemented, because I haven't found anything which can be done with iterables yet.
 
 #####@@REFERENCES
-Refernces are text strings which will be replaced. Each reference should be given in the form:
->@RefName:
->"string"
+Refernces are text strings which will be replaced. Each reference should be given in the form:<br />
+>@RefName:<br />
+>"string"<br />
 Everywhere that @RefName@ is used it will be replaced with "string". Note that when a reference is used, it needs to have '@'s as bookends.
 
 ####Files
 Other files can be included into a template as if they where part of the original. File names should have '%' bookends.
 
-If just a filename is give, the entire file is loaded as if it was part of the original template.
->%OtherFile.txt%  # Load the whole file
-You can specify parts of the file to load by following the filename with and argument in '[]' brackets.If one number is given in the brackets, only that line is loaded.
->%OtherFile.txt[2]%  # Load line 2
-If two numbers are given, all of the lines between and including the two are loaded. Either number can be a ':', and then it will load up to the end of the file
->%OtherFile.txt[2,5]%  # Load lines 2-5
->%OtherFile.txt[2,:]%  # Load lines 2 to the end
->%OtherFile.txt[:,5]%  # Load lines from the start to line 5
-If three numbers are given, seperated by commas, the lines between the first two, modulo the third are loaded. The ':' can still be used.
->%OtherFile.txt[2,:,3]%  # Load every third line, from 2 to the end
+If just a filename is give, the entire file is loaded as if it was part of the original template.<br />
+>%OtherFile.txt%  # Load the whole file<br />
+You can specify parts of the file to load by following the filename with and argument in '[]' brackets.If one number is given in the brackets, only that line is loaded.<br />
+>%OtherFile.txt[2]%  # Load line 2<br />
+If two numbers are given, all of the lines between and including the two are loaded. Either number can be a ':', and then it will load up to the end of the file<br />
+>%OtherFile.txt[2,5]%  # Load lines 2-5<br />
+>%OtherFile.txt[2,:]%  # Load lines 2 to the end<br />
+>%OtherFile.txt[:,5]%  # Load lines from the start to line 5<br />
+If three numbers are given, seperated by commas, the lines between the first two, modulo the third are loaded. The ':' can still be used.<br />
+>%OtherFile.txt[2,:,3]%  # Load every third line, from 2 to the end<br />
 
-File replacement can be very usefull when defining iterables. I often have lists of files which will need to be loaded, and I can easily make an iterable out of them in a few steps:
->At the command line:
->>$ ls -1 \*.bin > filelist.txt 
->in the template:
->>@@ITERABLES
->>@Files(names):
->>%filelist.txt%
+File replacement can be very usefull when defining iterables. I often have lists of files which will need to be loaded, and I can easily make an iterable out of them in a few steps:<br />
+>At the command line:<br />
+>>$ ls -1 \*.bin > filelist.txt <br />
+>in the template:<br />
+>>@@ITERABLES<br />
+>>@Files(names):<br />
+>>%filelist.txt%<br />
 
 ####Order of operations and multiple passes
 The order in which things are processed is: file expansion, iterables, then reference replacement. Multiple passes are teken when processing a template, so it is possible to do creative things like use references in defining iterables. Currently the preprocessor take five passes, althougth this could be set as an option in GUIDE section. Priorites are set with '!'s. The more '!'s there are in front of it, the more important it is. Because the current max depth is five, the most '!'s you can use is four. No '!'s is lowest priority, so using '!' is entrirely optional. The '!' should be placed before the '@' bookends.
