@@ -91,7 +91,7 @@ Other files can be included into a template as if they where part of the origina
 If just a filename is give, the entire file is loaded as if it was part of the original template.<br />
 > %OtherFile.txt%  # Load the whole file<br />
 
-You can specify parts of the file to load by following the filename with and argument in '[]' brackets.If one number is given in the brackets, only that line is loaded.<br />
+You can specify parts of the file to load by following the filename with an argument in '[]' brackets. If one number is given in the brackets, only that line is loaded.<br />
 > %OtherFile.txt[2]%  # Load line 2<br />
 
 If two numbers are given, all of the lines between and including the two are loaded. Either number can be a ':', and then it will load up to the end of the file<br />
