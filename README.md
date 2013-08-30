@@ -70,6 +70,7 @@ There is also a special iterable '@i@', which will be replaced with the count of
 >>A<br />
 >>B<br />
 >>C<br />
+><br />
 >Use it:<br />
 >>int @Counting.name@ = @i@;<br />
 
@@ -87,22 +88,28 @@ Other files can be included into a template as if they where part of the origina
 
 If just a filename is give, the entire file is loaded as if it was part of the original template.<br />
 >%OtherFile.txt%  # Load the whole file<br />
+><br />
 You can specify parts of the file to load by following the filename with and argument in '[]' brackets.If one number is given in the brackets, only that line is loaded.<br />
 >%OtherFile.txt[2]%  # Load line 2<br />
+><br />
 If two numbers are given, all of the lines between and including the two are loaded. Either number can be a ':', and then it will load up to the end of the file<br />
 >%OtherFile.txt[2,5]%  # Load lines 2-5<br />
 >%OtherFile.txt[2,:]%  # Load lines 2 to the end<br />
 >%OtherFile.txt[:,5]%  # Load lines from the start to line 5<br />
+><br />
 If three numbers are given, seperated by commas, the lines between the first two, modulo the third are loaded. The ':' can still be used.<br />
 >%OtherFile.txt[2,:,3]%  # Load every third line, from 2 to the end<br />
+><br />
 
 File replacement can be very usefull when defining iterables. I often have lists of files which will need to be loaded, and I can easily make an iterable out of them in a few steps:<br />
 >At the command line:<br />
 >>$ ls -1 \*.bin > filelist.txt <br />
+><br />
 >in the template:<br />
 >>@@ITERABLES<br />
 >>@Files(names):<br />
 >>%filelist.txt%<br />
+><br />
 
 ####Order of operations and multiple passes
 The order in which things are processed is: file expansion, iterables, then reference replacement. Multiple passes are teken when processing a template, so it is possible to do creative things like use references in defining iterables. Currently the preprocessor take five passes, althougth this could be set as an option in GUIDE section. Priorites are set with '!'s. The more '!'s there are in front of it, the more important it is. Because the current max depth is five, the most '!'s you can use is four. No '!'s is lowest priority, so using '!' is entrirely optional. The '!' should be placed before the '@' bookends.
