@@ -41,11 +41,11 @@ Here is where properties of the pre-processor can be set. There are currently th
 Here are the current options and thier defaults:<br />
 > @Passes = 5<br />
 > @Fdelimeter = %<br />
-> @LevelIndicator = !<br />
+> @Levelindicator = !<br />
 
 The spaces around the '=' are necessary.<br />
 
-The option '@Passes' controls the number of passes taking which is explained in the section "Order of operations and multiple passes". The option '@Fdelimeter' controls the character or string which is read as file bookends, see section "Files". The option '@LevelIndicator' is used to distinguish which pass the compiler should address each operation, as discussed in the section "Order of operations and multiple passes".
+The option '@Passes' controls the number of passes taken which is explained in the section "Order of operations and multiple passes". The option '@Fdelimeter' controls the character or string which is read as file bookends, see section "Files". The option '@Levelindicator' is used to distinguish which pass the compiler should address each operation, as discussed in the section "Order of operations and multiple passes".
 
 #####@@TEMPLATE
 This is part of the template which turns into your code.

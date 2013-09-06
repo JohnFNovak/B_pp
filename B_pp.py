@@ -22,7 +22,7 @@ def Process(filename):
     if (oFull[0] != '@') or (len(oFull.split(newline)) <= 3):
         print "file", filename, "does not appear to be properly formated"
 
-    Opts = {'@Passes': 5, '@Fdelimeter': '%', '@LevelIndicator': '!'}
+    Opts = {'@Passes': 5, '@Fdelimeter': '%', '@Levelindicator': '!'}
     for i in oFull.split('@@'):
         options = None
         if i[:5] == 'GUIDE':
