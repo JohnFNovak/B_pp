@@ -36,7 +36,16 @@ There are five parts to a template:<br />
 Each of these needs to be in capitals and prefaces with two '@' symbols. Example '@@TEMPLATE'
 
 #####@@GUIDE
-Here is where properties of the pre-processor can be set. There isn't much to do here now, but the code could be expanded so that options could be defined here
+Here is where properties of the pre-processor can be set. There are currently three options which you can set: the number of passes that the compiler will take, the file delimeter, and the level indicator.<br />
+
+Here are the current options and thier defaults:<br />
+> @Passes = 5<br />
+> @Fdelimeter = %<br />
+> @LevelIndicator = !<br />
+
+The spaces around the '=' are necessary.<br />
+
+The option '@Passes' controls the number of passes taking which is explained in the section "Order of operations and multiple passes". The option '@Fdelimeter' controls the character or string which is read as file bookends, see section "Files". The option '@LevelIndicator' is used to distinguish which pass the compiler should address each operation, as discussed in the section "Order of operations and multiple passes".
 
 #####@@TEMPLATE
 This is part of the template which turns into your code.
