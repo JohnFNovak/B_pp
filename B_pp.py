@@ -38,7 +38,7 @@ def Process(filename):
 
     Full['TEMPLATE'] = ''
     for i in range(Opts['@Passes'], -1, -1):
-        pf = Opts['@LevelIndicator'] * i
+        pf = Opts['@Levelindicator'] * i
         Full[pf + 'ITERABLES'] = ''
         Full[pf + 'REFERENCES'] = ''
         Full[pf + 'FORMS'] = ''
@@ -55,11 +55,11 @@ def Process(filename):
     #REFERENCES = Full.split('@@')[5].split(newline)[1:]
 
     for i in range(Opts['@Passes'], -1, -1):
-        pf = Opts['@LevelIndicator'] * i
+        pf = Opts['@Levelindicator'] * i
         #print 'reading priority',pf
         # First we expand the files
         for j in range(Opts['@Passes'], -1, -1):
-            pf2 = Opts['@LevelIndicator'] * j
+            pf2 = Opts['@Levelindicator'] * j
             Full['TEMPLATE'] = ExpandFiles(Full['TEMPLATE'], i)
             Full[pf2 + 'ITERABLES'] = ExpandFiles(Full[pf2 + 'ITERABLES'], i)
             Full[pf2 + 'REFERENCES'] = ExpandFiles(Full[pf2 + 'REFERENCES'], i)
@@ -69,7 +69,7 @@ def Process(filename):
 
         # Then we processes ITERABLES
         for j in range(Opts['@Passes'], -1, -1):
-            pf2 = Opts['@LevelIndicator'] * j
+            pf2 = Opts['@Levelindicator'] * j
             Full['TEMPLATE'] = ExpandIters(Full['TEMPLATE'], IterDict, i)
             Full[pf2 + 'FORMS'] = ExpandIters(Full[pf2 + 'FORMS'], IterDict, i)
             Full[pf2 + 'REFERENCES'] = ExpandIters(Full[pf2 + 'REFERENCES'],
@@ -82,7 +82,7 @@ def Process(filename):
 
         # Then we replace REFERENCES
         for j in range(Opts['@Passes'], -1, -1):
-            pf2 = Opts['@LevelIndicator'] * j
+            pf2 = Opts['@Levelindicator'] * j
             Full['TEMPLATE'] = ExpandRefs(Full['TEMPLATE'], RefDict, i)
             Full[pf2 + 'ITERABLES'] = ExpandRefs(Full[pf2 + 'ITERABLES'],
                                                  RefDict, i)
@@ -97,7 +97,7 @@ def Process(filename):
 def ExpandFiles(TEMPLATE, depth):
     global Opts
     FD = Opts['@Fdelimeter']
-    pf = Opts['@LevelIndicator'] * depth
+    pf = Opts['@Levelindicator'] * depth
     files_expanded = False
     while not files_expanded:
         files_expanded = True
@@ -188,7 +188,7 @@ def LoadIters(ITERABLES):
 
 def ExpandIters(Text, Iters, depth):
     global Opts
-    pf = Opts['@LevelIndicator'] * depth
+    pf = Opts['@Levelindicator'] * depth
     #Text = '\n'.join(Text)
     good = False
     while not good:
@@ -238,7 +238,7 @@ def LoadRefs(REFERENCES):
 
 def ExpandRefs(Text, Refs, depth):
     global Opts
-    pf = Opts['@LevelIndicator'] * depth
+    pf = Opts['@Levelindicator'] * depth
     good = False
     while not good:
         good = True
