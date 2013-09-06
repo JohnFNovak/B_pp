@@ -14,6 +14,7 @@ newline = '\n'
 
 global Full
 
+
 def Process(filename):
     global Full
     oFull = open(filename, 'r').read()
@@ -58,7 +59,8 @@ def Process(filename):
             pf2 = '!' * j
             Full['TEMPLATE'] = ExpandIters(Full['TEMPLATE'], IterDict, i)
             Full[pf2 + 'FORMS'] = ExpandIters(Full[pf2 + 'FORMS'], IterDict, i)
-            Full[pf2 + 'REFERENCES'] = ExpandIters(Full[pf2 + 'REFERENCES'], IterDict, i)
+            Full[pf2 + 'REFERENCES'] = ExpandIters(Full[pf2 + 'REFERENCES'],
+                                                   IterDict, i)
 
         # Then we handle FORMS
 
@@ -69,10 +71,12 @@ def Process(filename):
         for j in range(5, -1, -1):
             pf2 = '!' * j
             Full['TEMPLATE'] = ExpandRefs(Full['TEMPLATE'], RefDict, i)
-            Full[pf2 + 'ITERABLES'] = ExpandRefs(Full[pf2 + 'ITERABLES'], RefDict, i)
-            Full[pf2 + 'REFERENCES'] = ExpandRefs(Full[pf2 + 'REFERENCES'], RefDict, i)
+            Full[pf2 + 'ITERABLES'] = ExpandRefs(Full[pf2 + 'ITERABLES'],
+                                                 RefDict, i)
+            Full[pf2 + 'REFERENCES'] = ExpandRefs(Full[pf2 + 'REFERENCES'],
+                                                  RefDict, i)
 
-    output = open(filename.replace('.B', ''), 'w')  # The proper form for input files is name.B.ending
+    output = open(filename.replace('.B', ''), 'w')
     output.write('\n'.join(Full['TEMPLATE']))
     output.close()
 
@@ -97,41 +101,52 @@ def ExpandFiles(TEMPLATE, depth):
                             SubRange = SubFile[:-1].split('[')[1]
                             SubFile = SubFile.split('[')[0]
                             if SubRange.count(',') == 0:
-                                adding = [open(SubFile, 'r').read().split(newline)[int(SubRange)]]
+                                adding = [open(SubFile, 'r').read().split(
+                                          newline)[int(SubRange)]]
                             if SubRange.count(',') == 1:
                                 SubRange = SubRange.split(',')
                                 if SubRange[0] == ':':
-                                    adding = open(SubFile, 'r').read().split(newline)[:int(SubRange[1])]
+                                    adding = open(SubFile, 'r').read().split(
+                                        newline)[:int(SubRange[1])]
                                 elif SubRange[1] == ':':
-                                    adding = open(SubFile, 'r').read().split(newline)[int(SubRange[0]):-1]
+                                    adding = open(SubFile, 'r').read().split(
+                                        newline)[int(SubRange[0]):-1]
                                 else:
-                                    adding = open(SubFile, 'r').read().split(newline)[int(SubRange[0]):int(SubRange[1])]
+                                    adding = open(SubFile, 'r').read().split(
+                                        newline)[int(SubRange[0]):int(
+                                        SubRange[1])]
                             if SubRange.count(',') == 2:
                                 SubRange = SubRange.split(',')
                                 if SubRange[0] == ':':
-                                    adding = open(SubFile, 'r').read().split(newline)[:int(SubRange[1])]
+                                    adding = open(SubFile, 'r').read().split(
+                                        newline)[:int(SubRange[1])]
                                 elif SubRange[1] == ':':
-                                    adding = open(SubFile, 'r').read().split(newline)[int(SubRange[0]):-1]
+                                    adding = open(SubFile, 'r').read().split(
+                                        newline)[int(SubRange[0]):-1]
                                 else:
-                                    adding = open(SubFile, 'r').read().split(newline)[int(SubRange[0]):int(SubRange[1])]
+                                    adding = open(SubFile, 'r').read().split(
+                                        newline)[int(SubRange[0]):int(
+                                        SubRange[1])]
                                 temp = []
                                 for i in range(len(adding)):
                                     if i % int(SubRange[2]) == 0:
                                         temp.append(adding[i])
                                 adding = temp
                         else:
-                            adding = open(SubFile, 'r').read().split(newline)[:-1]
+                            adding = open(SubFile, 'r').read().split(
+                                newline)[:-1]
                         count = 0
                         #print line
                         for nline in adding:
                             #print nline
-                            nTEMPLATE.insert(TEMPLATE.index(line) + count, line.replace(oSubFile, nline))
+                            nTEMPLATE.insert(TEMPLATE.index(line) + count,
+                                             line.replace(oSubFile, nline))
                             count += 1
                         del nTEMPLATE[TEMPLATE.index(line)]
                         break
                     else:
-                        print 'Error in line:',line
-                        print SubFile.split('[')[0],'does not seem to be a file'
+                        print 'Error in line:', line
+                        print SubFile.split('[')[0], 'does not seem to be a file'
                         exit(1)
         TEMPLATE = nTEMPLATE
     return TEMPLATE
