@@ -17,15 +17,28 @@ global Full
 
 def Process(filename):
     global Full
+    global Opts
     oFull = open(filename, 'r').read()
     if (oFull[0] != '@') or (len(oFull.split(newline)) <= 3):
         print "file", filename, "does not appear to be properly formated"
 
+    Opts = {'@Passes': 5, '@Fdelimeter': '%', '@LevelIndicator': '!'}
+    for i in oFull.split('@@'):
+        options = None
+        if i[:5] == 'GUIDE':
+            print 'Loading options from the GUIDE:'
+            options = i.split(newline)[1:-2]
+        if options:
+            for i in options:
+                print i
+                Opts[i.split(' = ')[0]] = i.split(' = ')[1]
+    Opts['@Passes'] = int(Opts['@Passes'])
+
     Full = {}
 
     Full['TEMPLATE'] = ''
-    for i in range(5, -1, -1):
-        pf = '!' * i
+    for i in range(Opts['@Passes'], -1, -1):
+        pf = Opts['@LevelIndicator'] * i
         Full[pf + 'ITERABLES'] = ''
         Full[pf + 'REFERENCES'] = ''
         Full[pf + 'FORMS'] = ''
@@ -41,12 +54,12 @@ def Process(filename):
     #FORMS = Full.split('@@')[4].split(newline)[1:]
     #REFERENCES = Full.split('@@')[5].split(newline)[1:]
 
-    for i in range(5, -1, -1):
-        pf = '!' * i
+    for i in range(Opts['@Passes'], -1, -1):
+        pf = Opts['@LevelIndicator'] * i
         #print 'reading priority',pf
         # First we expand the files
-        for j in range(5, -1, -1):
-            pf2 = '!' * j
+        for j in range(Opts['@Passes'], -1, -1):
+            pf2 = Opts['@LevelIndicator'] * j
             Full['TEMPLATE'] = ExpandFiles(Full['TEMPLATE'], i)
             Full[pf2 + 'ITERABLES'] = ExpandFiles(Full[pf2 + 'ITERABLES'], i)
             Full[pf2 + 'REFERENCES'] = ExpandFiles(Full[pf2 + 'REFERENCES'], i)
@@ -55,8 +68,8 @@ def Process(filename):
         IterDict = LoadIters(Full[pf + 'ITERABLES'])
 
         # Then we processes ITERABLES
-        for j in range(5, -1, -1):
-            pf2 = '!' * j
+        for j in range(Opts['@Passes'], -1, -1):
+            pf2 = Opts['@LevelIndicator'] * j
             Full['TEMPLATE'] = ExpandIters(Full['TEMPLATE'], IterDict, i)
             Full[pf2 + 'FORMS'] = ExpandIters(Full[pf2 + 'FORMS'], IterDict, i)
             Full[pf2 + 'REFERENCES'] = ExpandIters(Full[pf2 + 'REFERENCES'],
@@ -68,8 +81,8 @@ def Process(filename):
         RefDict = LoadRefs(Full[pf + 'REFERENCES'])
 
         # Then we replace REFERENCES
-        for j in range(5, -1, -1):
-            pf2 = '!' * j
+        for j in range(Opts['@Passes'], -1, -1):
+            pf2 = Opts['@LevelIndicator'] * j
             Full['TEMPLATE'] = ExpandRefs(Full['TEMPLATE'], RefDict, i)
             Full[pf2 + 'ITERABLES'] = ExpandRefs(Full[pf2 + 'ITERABLES'],
                                                  RefDict, i)
@@ -82,16 +95,19 @@ def Process(filename):
 
 
 def ExpandFiles(TEMPLATE, depth):
-    pf = '!' * depth
+    global Opts
+    FD = Opts['@Fdelimeter']
+    pf = Opts['@LevelIndicator'] * depth
     files_expanded = False
     while not files_expanded:
         files_expanded = True
         nTEMPLATE = TEMPLATE
         for line in TEMPLATE:
-            if re.search(pf + '%([^%]+)%', line) and not 'printf' in line:
+            if re.search(pf + FD + '([^' + FD + ']+)' + FD, line
+                         ) and not 'printf' in line:
                 #print line
                 files_expanded = False
-                SubFile = re.search(pf + '%([^%]+)%', line)
+                SubFile = re.search(pf + FD + '([^' + FD + ']+)' + FD, line)
                 if SubFile.group:
                     oSubFile = SubFile.group()
                     #print oSubFile
@@ -154,6 +170,7 @@ def ExpandFiles(TEMPLATE, depth):
 
 
 def LoadIters(ITERABLES):
+    global Opts
     ITERABLES = '\n'.join(ITERABLES)
     ITERABLES = ITERABLES.split('@')[1:]
     IDict = {}
@@ -170,7 +187,8 @@ def LoadIters(ITERABLES):
 
 
 def ExpandIters(Text, Iters, depth):
-    pf = '!' * depth
+    global Opts
+    pf = Opts['@LevelIndicator'] * depth
     #Text = '\n'.join(Text)
     good = False
     while not good:
@@ -189,7 +207,7 @@ def ExpandIters(Text, Iters, depth):
                             #print line, j, Iters[i][1][j]
                             nline = nline.replace(pf + '@i@', str(j))
                             # for every id in the key
-                            for k in range(ln(Iters[i][0])):
+                            for k in range(len(Iters[i][0])):
                                 #print '@'+i+'.'+Iters[i][0][k]+'@'
                                 nline = nline.replace(pf + '@' + i + '.' +
                                                       Iters[i][0][k] + '@',
@@ -205,6 +223,7 @@ def ExpandIters(Text, Iters, depth):
 
 
 def LoadRefs(REFERENCES):
+    global Opts
     REFERENCES = '\n'.join(REFERENCES)
     REFERENCES = REFERENCES.split('@')[1:]
     Refs = {}
@@ -218,7 +237,8 @@ def LoadRefs(REFERENCES):
 
 
 def ExpandRefs(Text, Refs, depth):
-    pf = '!' * depth
+    global Opts
+    pf = Opts['@LevelIndicator'] * depth
     good = False
     while not good:
         good = True
