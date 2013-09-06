@@ -146,7 +146,8 @@ def ExpandFiles(TEMPLATE, depth):
                         break
                     else:
                         print 'Error in line:', line
-                        print SubFile.split('[')[0], 'does not seem to be a file'
+                        print SubFile.split('[')[0],
+                        print 'does not seem to be a file'
                         exit(1)
         TEMPLATE = nTEMPLATE
     return TEMPLATE
@@ -159,9 +160,12 @@ def LoadIters(ITERABLES):
     for i in ITERABLES:
         j = i.split('\n')[:-1]
         if len(j[0].split('(')[1][:-2].split(',')) == 1:
-            IDict[j[0].split('(')[0]] = [j[0].split('(')[1][:-2].split(','), map(lambda x: [x], j[1:])]
+            IDict[j[0].split('(')[0]] = [j[0].split('(')[1][:-2].split(
+                                         ','), map(lambda x: [x], j[1:])]
         else:
-            IDict[j[0].split('(')[0]] = [j[0].split('(')[1][:-2].split(','), map(lambda x: x.split(' '), j[1:])]
+            IDict[j[0].split('(')[0]] = [j[0].split('(')[1][:-2].split(
+                                         ','), map(lambda x: x.split(' '),
+                                         j[1:])]
     return IDict
 
 
@@ -179,13 +183,17 @@ def ExpandIters(Text, Iters, depth):
                     good = False
                     count = 0
                     for j in range(len(Iters[i][1])):  # for every iteration
-                        if Iters[i][1][j][0]:  # we seem to be getting an empty line sometimes...
+                        # we seem to be getting an empty line sometimes...
+                        if Iters[i][1][j][0]:
                             nline = line
                             #print line, j, Iters[i][1][j]
                             nline = nline.replace(pf + '@i@', str(j))
-                            for k in range(len(Iters[i][0])):  # for every id in the key
+                            # for every id in the key
+                            for k in range(ln(Iters[i][0])):
                                 #print '@'+i+'.'+Iters[i][0][k]+'@'
-                                nline = nline.replace(pf + '@' + i + '.' + Iters[i][0][k] + '@', str(Iters[i][1][j][k]))
+                                nline = nline.replace(pf + '@' + i + '.' +
+                                                      Iters[i][0][k] + '@',
+                                                      str(Iters[i][1][j][k]))
                             cText.insert(Text.index(line) + count, nline)
                             count += 1
                             #print nline
