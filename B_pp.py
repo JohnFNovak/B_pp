@@ -32,7 +32,7 @@ def Process(filename):
             for i in options:
                 print i
                 Opts[i.split(' = ')[0]] = i.split(' = ')[1]
-    Opts['@Passes'] = int(Opts['@Passes'])
+    Opts['@Passes'] = int(Opts['@Passes']) - 1
     if Opts['@Verbose'] == 'True':
         Opts['@Verbose'] = True
 
