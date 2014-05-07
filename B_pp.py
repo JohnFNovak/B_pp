@@ -23,7 +23,7 @@ def Process(filename):
         print "file", filename, "does not appear to be properly formated"
 
     Opts = {'@Passes': 5, '@Fdelimeter': '%', '@Levelindicator': '!',
-            '@Verbose': False}
+            '@Verbose': '0'}
     for i in oFull.split('@@'):
         options = None
         if i[:5] == 'GUIDE':
@@ -34,8 +34,7 @@ def Process(filename):
                 print i
                 Opts[i.split(' = ')[0]] = i.split(' = ')[1]
     Opts['@Passes'] = int(Opts['@Passes']) - 1
-    if Opts['@Verbose'] == 'True':
-        Opts['@Verbose'] = True
+    Opts['@Verbose'] = int(Opts['@Verbose'])
 
     Full = {}
 
@@ -59,7 +58,7 @@ def Process(filename):
 
     for i in range(Opts['@Passes'], -1, -1):
         pf = Opts['@Levelindicator'] * i
-        if Opts['@Verbose']:
+        if Opts['@Verbose'] >= 1:
             print 'reading priority', pf
         # First we expand the files
         for j in range(Opts['@Passes'], -1, -1):
@@ -111,7 +110,7 @@ def ExpandFiles(TEMPLATE, depth):
                          ) and not 'printf' in line:
                 files_expanded = False
                 SubFile = re.search(pf + FD + '([^' + FD + ']+)' + FD, line)
-                if Opts['@Verbose']:
+                if Opts['@Verbose'] >= 1:
                     print 'File:', SubFile.group(1).split('[')[0]
                 if SubFile.group:
                     oSubFile = SubFile.group()
@@ -188,7 +187,7 @@ def LoadIters(ITERABLES):
             IDict[j[0].split('(')[0]] = [j[0].split('(')[1][:-2].split(
                                          ','), map(lambda x: x.split(' '),
                                          j[1:])]
-    if Opts['@Verbose']:
+    if Opts['@Verbose'] >= 1:
         print 'Iters:', IDict.keys()
     return IDict
 
@@ -211,7 +210,7 @@ def ExpandIters(Text, Iters, depth):
                         # we seem to be getting an empty line sometimes...
                         if Iters[i][1][j][0]:
                             nline = line
-                            if Opts['@Verbose']:
+                            if Opts['@Verbose'] >= 2:
                                 print 'Replacing', line
                             #print line, j, Iters[i][1][j]
                             nline = nline.replace(pf + '@i@', str(j))
@@ -223,7 +222,7 @@ def ExpandIters(Text, Iters, depth):
                                                       str(Iters[i][1][j][k]))
                             cText.insert(Text.index(line) + count, nline)
                             count += 1
-                            if Opts['@Verbose']:
+                            if Opts['@Verbose'] >= 2:
                                 print 'Replaced:', nline
                             #print nline
                     del cText[Text.index(line)]
@@ -243,7 +242,7 @@ def LoadRefs(REFERENCES):
         if j[-1] == '':
             j = j[:-1]
         Refs[j[0][:-1]] = '\n'.join(j[1:])
-    if Opts['@Verbose']:
+    if Opts['@Verbose'] >= 1:
         print "Refs:", Refs
     return Refs
 
