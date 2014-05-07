@@ -36,6 +36,9 @@ def Process(filename):
     Opts['@Passes'] = int(Opts['@Passes']) - 1
     Opts['@Verbose'] = int(Opts['@Verbose'])
 
+    if Opts['@Verbose'] >= 1:
+        print "Levelindicator:", Opts['@Levelindicator']
+
     Full = {}
 
     Full['TEMPLATE'] = ''
@@ -59,7 +62,7 @@ def Process(filename):
     for i in range(Opts['@Passes'], -1, -1):
         pf = Opts['@Levelindicator'] * i
         if Opts['@Verbose'] >= 1:
-            print 'reading priority', pf
+            print 'reading priority', Opts['@Passes'] - i + 1
         # First we expand the files
         for j in range(Opts['@Passes'], -1, -1):
             pf2 = Opts['@Levelindicator'] * j
