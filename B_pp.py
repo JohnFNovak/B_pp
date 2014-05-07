@@ -243,7 +243,8 @@ def LoadRefs(REFERENCES):
         if j[-1] == '':
             j = j[:-1]
         Refs[j[0][:-1]] = '\n'.join(j[1:])
-    #print Refs
+    if Opts['@Verbose']:
+        print "Refs:", Refs
     return Refs
 
 
