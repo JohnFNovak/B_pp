@@ -48,11 +48,18 @@ def Process(filename):
         Full[pf + 'REFERENCES'] = ''
         Full[pf + 'FORMS'] = ''
 
+    if Opts['@Verbose'] == 4:
+        print Full
+
     for i in oFull.split('@@')[1:]:
         Full[i.split('\n')[0]] = i.split('\n')[1:-1]
-        #print i.split('\n')[0]
-        #print '---------------'
-        #print i.split('\n')[1:-1]
+        if Opts['@Verbose'] == 3:
+            print i.split('\n')[0]
+            print '---------------'
+            print i.split('\n')[1:-1]
+
+    if Opts['@Verbose'] == 4:
+        print Full
 
     #TEMPLATE = Full.split('@@')[2].split(newline)[1:]
     #ITERABLES = Full.split('@@')[3].split(newline)[1:]
