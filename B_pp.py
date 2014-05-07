@@ -154,7 +154,9 @@ def ExpandFiles(TEMPLATE, depth):
                                 adding = temp
                         else:
                             adding = open(SubFile, 'r').read().split(
-                                newline)[:-1]
+                                newline)
+                            if adding[-1] == '':
+                                adding = adding[:-1]
                         count = 0
                         #print line
                         for nline in adding:
