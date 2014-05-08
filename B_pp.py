@@ -71,9 +71,8 @@ def Process(filename):
             Full[pf2 + 'REFERENCES'] = ExpandRefs(Full[pf2 + 'REFERENCES'],
                                                   RefDict, i)
 
-    output = open(filename.replace('.B', ''), 'w')
-    output.write('\n'.join(Full['TEMPLATE']))
-    output.close()
+    with open(filename.replace('.B', ''), 'w') as output:
+        output.write('\n'.join(Full['TEMPLATE']))
 
 
 def ProcessTemplate(text=None, dic=None):
