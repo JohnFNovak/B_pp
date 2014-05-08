@@ -12,18 +12,15 @@ import re
 
 newline = '\n'
 
-global Full
+Full = {}
+Opts = {'@Passes': 5, '@Fdelimeter': '%', '@Levelindicator': '!',
+        '@Verbose': '0'}
 
 
 def Process(filename):
-    global Full
-    global Opts
     oFull = open(filename, 'r').read()
     if (oFull[0] != '@') or (len(oFull.split(newline)) <= 3):
         print "file", filename, "does not appear to be properly formated"
-
-    Opts = {'@Passes': 5, '@Fdelimeter': '%', '@Levelindicator': '!',
-            '@Verbose': '0'}
 
     oFull = ProcessTemplate(oFull)
 
@@ -79,7 +76,6 @@ def Process(filename):
 
 
 def ProcessTemplate(oFull):
-    global Opts
     for i in oFull.split('@@'):
         options = None
         if i[:5] == 'GUIDE':
@@ -125,7 +121,6 @@ def ProcessTemplate(oFull):
 
 
 def ExpandFiles(TEMPLATE, depth):
-    global Opts
     FD = Opts['@Fdelimeter']
     pf = Opts['@Levelindicator'] * depth
     files_expanded = False
@@ -203,7 +198,6 @@ def ExpandFiles(TEMPLATE, depth):
 
 
 def LoadIters(ITERABLES):
-    global Opts
     ITERABLES = '\n'.join(ITERABLES)
     ITERABLES = ITERABLES.split('@')[1:]
     IDict = {}
@@ -222,7 +216,6 @@ def LoadIters(ITERABLES):
 
 
 def ExpandIters(Text, Iters, depth):
-    global Opts
     pf = Opts['@Levelindicator'] * depth
     #Text = '\n'.join(Text)
     good = False
@@ -262,7 +255,6 @@ def ExpandIters(Text, Iters, depth):
 
 
 def LoadRefs(REFERENCES):
-    global Opts
     REFERENCES = '\n'.join(REFERENCES)
     REFERENCES = REFERENCES.split('@')[1:]
     Refs = {}
@@ -277,7 +269,6 @@ def LoadRefs(REFERENCES):
 
 
 def ExpandRefs(Text, Refs, depth):
-    global Opts
     pf = Opts['@Levelindicator'] * depth
     good = False
     while not good:
