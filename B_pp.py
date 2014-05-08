@@ -126,7 +126,7 @@ def ProcessTemplate(text=None, dic=None):
         del dic['GUIDE']
 
     dic = {key: ([x for x in dic[key] if x.strip()] if key != 'TEMPLATE' else
-           dic[key]) for key in dic.keys()}
+           dic[key][:-1]) for key in dic.keys()}
 
     text = newline.join([newline.join(['@@' + i] + [x for x in dic[i]]) for i
                         in dic.keys()])
