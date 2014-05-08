@@ -118,12 +118,14 @@ def ProcessTemplate(text=None, dic=None):
         print text
 
     for i in text.split('@@')[1:]:
-        dic[i.split(newline)[0]] = i.split(newline)[1:-1]
+        dic[i.split(newline)[0]] = i.split(newline)[1:]
         if Opts['@Verbose'] == 3:
             print i.split(newline)[0], ':'
-            print i.split(newline)[1:-1]
+            print i.split(newline)[1:]
     if 'GUIDE' in dic.keys():
         del dic['GUIDE']
+
+    dic = {key: ([x for x in dic[key] if x.strip()] if key != 'TEMPLATE' else dic[key]) for key in dic.keys()}
 
     text = newline.join([newline.join(['@@' + i] + [x for x in dic[i]]) for i in dic.keys()])
 
@@ -218,7 +220,7 @@ def LoadIters(ITERABLES):
     ITERABLES = ITERABLES.split('@')[1:]
     IDict = {}
     for i in ITERABLES:
-        j = i.split('\n')[:-1]
+        j = [x for x in i.split('\n') if x.strip()]
         if len(j[0].split('(')[1][:-2].split(',')) == 1:
             IDict[j[0].split('(')[0]] = [j[0].split('(')[1][:-2].split(
                                          ','), map(lambda x: [x], j[1:])]
