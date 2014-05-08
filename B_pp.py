@@ -102,6 +102,7 @@ def ProcessTemplate(oFull):
 
     if Opts['@Verbose'] == 4:
         print Full
+        print oFull
 
     for i in oFull.split('@@')[1:]:
         Full[i.split(newline)[0]] = i.split(newline)[1:-1]
@@ -116,6 +117,7 @@ def ProcessTemplate(oFull):
 
     if Opts['@Verbose'] == 4:
         print Full
+        print oFull
 
     return oFull
 
