@@ -34,7 +34,8 @@ def Process(filename):
         pf = Opts['@Levelindicator'] * i
         if Opts['@Verbose'] >= 1:
             print "#=============#"
-            print 'reading priority', Opts['@Passes'] - i + 1, "Flag: '%s'" % (pf)
+            print 'reading priority', Opts['@Passes'] - i + 1,
+            print "Flag: '%s'" % (pf)
         # First we expand the files
         for j in range(Opts['@Passes'], -1, -1):
             pf2 = Opts['@Levelindicator'] * j
@@ -53,7 +54,8 @@ def Process(filename):
         for j in range(Opts['@Passes'], -1, -1):
             pf2 = Opts['@Levelindicator'] * j
             Full['TEMPLATE'] = ExpandIters(Full['TEMPLATE'], IterDict, i)
-            # Full[pf2 + 'FORMS'] = ExpandIters(Full[pf2 + 'FORMS'], IterDict, i)
+            # Full[pf2 + 'FORMS'] = ExpandIters(Full[pf2 + 'FORMS'], IterDict,
+            #                                   i)
             Full[pf2 + 'REFERENCES'] = ExpandIters(Full[pf2 + 'REFERENCES'],
                                                    IterDict, i)
 
@@ -107,7 +109,8 @@ def ProcessTemplate(text=None, dic=None):
             dic[pf + 'REFERENCES'] = ''
             # dic[pf + 'FORMS'] = ''
     elif dic:  # If it is not the first pass, we need to remake text first
-        text = newline.join([newline.join(['@@' + i] + [x for x in dic[i]]) for i in dic.keys()])
+        text = newline.join([newline.join(['@@' + i] + [x for x in dic[i]]) for
+                            i in dic.keys()])
     else:
         print "No values passed to function: ProcessTemplate"
         return False
@@ -125,9 +128,11 @@ def ProcessTemplate(text=None, dic=None):
     if 'GUIDE' in dic.keys():
         del dic['GUIDE']
 
-    dic = {key: ([x for x in dic[key] if x.strip()] if key != 'TEMPLATE' else dic[key]) for key in dic.keys()}
+    dic = {key: ([x for x in dic[key] if x.strip()] if key != 'TEMPLATE' else
+           dic[key]) for key in dic.keys()}
 
-    text = newline.join([newline.join(['@@' + i] + [x for x in dic[i]]) for i in dic.keys()])
+    text = newline.join([newline.join(['@@' + i] + [x for x in dic[i]]) for i
+                        in dic.keys()])
 
     if Opts['@Verbose'] == 4:
         print 'dic:', dic
