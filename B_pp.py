@@ -27,7 +27,6 @@ def Process(filename):
 
     #TEMPLATE = Full.split('@@')[2].split(newline)[1:]
     #ITERABLES = Full.split('@@')[3].split(newline)[1:]
-    #FORMS = Full.split('@@')[4].split(newline)[1:]
     #REFERENCES = Full.split('@@')[5].split(newline)[1:]
 
     for i in range(Opts['@Passes'], -1, -1):
@@ -54,12 +53,8 @@ def Process(filename):
         for j in range(Opts['@Passes'], -1, -1):
             pf2 = Opts['@Levelindicator'] * j
             Full['TEMPLATE'] = ExpandIters(Full['TEMPLATE'], IterDict, i)
-            # Full[pf2 + 'FORMS'] = ExpandIters(Full[pf2 + 'FORMS'], IterDict,
-            #                                   i)
             Full[pf2 + 'REFERENCES'] = ExpandIters(Full[pf2 + 'REFERENCES'],
                                                    IterDict, i)
-
-        # Then we handle FORMS
 
         # Then we load REFERENCES
         RefDict = LoadRefs(Full[pf + 'REFERENCES'])
@@ -107,7 +102,6 @@ def ProcessTemplate(text=None, dic=None):
             pf = Opts['@Levelindicator'] * i
             dic[pf + 'ITERABLES'] = ''
             dic[pf + 'REFERENCES'] = ''
-            # dic[pf + 'FORMS'] = ''
     elif dic:  # If it is not the first pass, we need to remake text first
         text = newline.join([newline.join(['@@' + i] + [x for x in dic[i]]) for
                             i in dic.keys()])
