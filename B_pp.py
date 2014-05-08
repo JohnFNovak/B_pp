@@ -53,7 +53,7 @@ def Process(filename):
         for j in range(Opts['@Passes'], -1, -1):
             pf2 = Opts['@Levelindicator'] * j
             Full['TEMPLATE'] = ExpandIters(Full['TEMPLATE'], IterDict, i)
-            Full[pf2 + 'FORMS'] = ExpandIters(Full[pf2 + 'FORMS'], IterDict, i)
+            # Full[pf2 + 'FORMS'] = ExpandIters(Full[pf2 + 'FORMS'], IterDict, i)
             Full[pf2 + 'REFERENCES'] = ExpandIters(Full[pf2 + 'REFERENCES'],
                                                    IterDict, i)
 
