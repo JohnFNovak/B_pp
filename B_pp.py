@@ -113,7 +113,7 @@ def ProcessTemplate(oFull):
     if 'GUIDE' in Full.keys():
         del Full['GUIDE']
 
-    oFull = newline.join([newline.join(x) for i in Full.keys() for x in Full[i]])
+    oFull = newline.join([newline.join(['@@' + i] + [x for x in Full[i]]) for i in Full.keys()])
 
     if Opts['@Verbose'] == 4:
         print Full
