@@ -70,6 +70,7 @@ def Process(filename):
                                                  RefDict, i)
             Full[pf2 + 'REFERENCES'] = ExpandRefs(Full[pf2 + 'REFERENCES'],
                                                   RefDict, i)
+        Opts['@Passes'] = int(Opts['@Passes']) - 1
 
     with open(filename.replace('.B', ''), 'w') as output:
         output.write('\n'.join(Full['TEMPLATE']))
