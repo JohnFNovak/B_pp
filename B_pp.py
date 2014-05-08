@@ -96,15 +96,12 @@ def ProcessTemplate(oFull):
     Opts['@Passes'] = int(Opts['@Passes']) - 1
     Opts['@Verbose'] = int(Opts['@Verbose'])
 
-
-    Full = {}
-
     Full['TEMPLATE'] = ''
     for i in range(Opts['@Passes'], -1, -1):
         pf = Opts['@Levelindicator'] * i
         Full[pf + 'ITERABLES'] = ''
         Full[pf + 'REFERENCES'] = ''
-        Full[pf + 'FORMS'] = ''
+        # Full[pf + 'FORMS'] = ''
 
     if Opts['@Verbose'] == 4:
         print 'Full:', Full
