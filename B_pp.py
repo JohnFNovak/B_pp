@@ -230,6 +230,8 @@ def LoadIters(ITERABLES):
                                          j[1:])]
     if Opts['@Verbose'] >= 1:
         print 'Iters:', IDict.keys()
+        for i in IDict:
+            print i, IDict[i]
     return IDict
 
 
