@@ -12,21 +12,18 @@ import re
 
 newline = '\n'
 
-global Full
 global Opts
-Full = {}
 Opts = {'@Passes': 5, '@Fdelimeter': '%', '@Levelindicator': '!',
         '@Verbose': '0'}
 
 
 def Process(filename):
-    global Full
     global Opts
     oFull = open(filename, 'r').read()
     if (oFull[0] != '@') or (len(oFull.split(newline)) <= 3):
         print "file", filename, "does not appear to be properly formated"
 
-    oFull = ProcessTemplate(oFull)
+    Full = ProcessTemplate(text=oFull)
 
     #TEMPLATE = Full.split('@@')[2].split(newline)[1:]
     #ITERABLES = Full.split('@@')[3].split(newline)[1:]
@@ -47,7 +44,7 @@ def Process(filename):
 
         # After loading files we reprocess the template, which allows you to
         # put new definitions in the files you reference
-        oFull = ProcessTemplate(oFull)
+        Full = ProcessTemplate(dic=Full)
 
         # First we have to load the ITERABLES
         IterDict = LoadIters(Full[pf + 'ITERABLES'])
@@ -79,53 +76,64 @@ def Process(filename):
     output.close()
 
 
-def ProcessTemplate(oFull):
-    global Full
+def ProcessTemplate(text=None, dic=None):
     global Opts
-    for i in oFull.split('@@'):
-        options = None
-        if i[:5] == 'GUIDE':
-            print 'Loading options from the GUIDE:'
-            options = i.split(newline)[1:-2]
-        if options:
-            for i in options:
-                print i
-                Opts[i.split(' = ')[0]] = i.split(' = ')[1]
-            if Opts['@Verbose'] >= 1:
-                print "Levelindicator:", Opts['@Levelindicator']
-    Opts['@Passes'] = int(Opts['@Passes']) - 1
+    options = None
+    if text:
+        for i in text.split('@@'):
+            if i[:5] == 'GUIDE':
+                print 'Loading options from the GUIDE:'
+                options = i.split(newline)[1:-2]
+    if dic:
+        if 'GUIDE' in dic:
+            options = dic['GUIDE']
+    if options:
+        for i in options:
+            print i
+            Opts[i.split(' = ')[0]] = i.split(' = ')[1]
+        if Opts['@Verbose'] >= 1:
+            print "Levelindicator:", Opts['@Levelindicator']
     Opts['@Verbose'] = int(Opts['@Verbose'])
+    Opts['@Passes'] = int(Opts['@Passes']) - 1
 
-    Full['TEMPLATE'] = ''
-    for i in range(Opts['@Passes'], -1, -1):
-        pf = Opts['@Levelindicator'] * i
-        Full[pf + 'ITERABLES'] = ''
-        Full[pf + 'REFERENCES'] = ''
-        # Full[pf + 'FORMS'] = ''
+    # Full is only empty on the first pass, so we make it
+    if text:
+        print "First Pass"
+        dic = {'TEMPLATE': ''}
+        for i in range(Opts['@Passes'], -1, -1):
+            pf = Opts['@Levelindicator'] * i
+            dic[pf + 'ITERABLES'] = ''
+            dic[pf + 'REFERENCES'] = ''
+            # dic[pf + 'FORMS'] = ''
+    elif dic:  # If it is not the first pass, we need to remake text first
+        text = newline.join([newline.join(['@@' + i] + [x for x in dic[i]]) for i in dic.keys()])
+    else:
+        print "No values passed to function: ProcessTemplate"
+        return False
 
     if Opts['@Verbose'] == 4:
-        print 'Full:', Full
-        print 'oFull:', oFull
+        print 'dic:', dic
+        print 'text:'
+        print text
 
-    for i in oFull.split('@@')[1:]:
-        Full[i.split(newline)[0]] = i.split(newline)[1:-1]
+    for i in text.split('@@')[1:]:
+        dic[i.split(newline)[0]] = i.split(newline)[1:-1]
         if Opts['@Verbose'] == 3:
             print i.split(newline)[0], ':'
             print i.split(newline)[1:-1]
-    if 'GUIDE' in Full.keys():
-        del Full['GUIDE']
+    if 'GUIDE' in dic.keys():
+        del dic['GUIDE']
 
-    oFull = newline.join([newline.join(['@@' + i] + [x for x in Full[i]]) for i in Full.keys()])
+    text = newline.join([newline.join(['@@' + i] + [x for x in dic[i]]) for i in dic.keys()])
 
     if Opts['@Verbose'] == 4:
-        print 'Full:', Full
-        print 'oFull:', oFull
+        print 'dic:', dic
+        print 'text:', text
 
-    return oFull
+    return dic
 
 
 def ExpandFiles(TEMPLATE, depth):
-    global Full
     global Opts
     FD = Opts['@Fdelimeter']
     pf = Opts['@Levelindicator'] * depth
@@ -204,7 +212,6 @@ def ExpandFiles(TEMPLATE, depth):
 
 
 def LoadIters(ITERABLES):
-    global Full
     global Opts
     ITERABLES = '\n'.join(ITERABLES)
     ITERABLES = ITERABLES.split('@')[1:]
@@ -224,7 +231,6 @@ def LoadIters(ITERABLES):
 
 
 def ExpandIters(Text, Iters, depth):
-    global Full
     global Opts
     pf = Opts['@Levelindicator'] * depth
     #Text = '\n'.join(Text)
@@ -265,7 +271,6 @@ def ExpandIters(Text, Iters, depth):
 
 
 def LoadRefs(REFERENCES):
-    global Full
     global Opts
     REFERENCES = '\n'.join(REFERENCES)
     REFERENCES = REFERENCES.split('@')[1:]
@@ -281,7 +286,6 @@ def LoadRefs(REFERENCES):
 
 
 def ExpandRefs(Text, Refs, depth):
-    global Full
     global Opts
     pf = Opts['@Levelindicator'] * depth
     good = False
