@@ -24,6 +24,62 @@ def Process(filename):
 
     Opts = {'@Passes': 5, '@Fdelimeter': '%', '@Levelindicator': '!',
             '@Verbose': '0'}
+
+    oFull = ProcessTemplate(oFull)
+
+    #TEMPLATE = Full.split('@@')[2].split(newline)[1:]
+    #ITERABLES = Full.split('@@')[3].split(newline)[1:]
+    #FORMS = Full.split('@@')[4].split(newline)[1:]
+    #REFERENCES = Full.split('@@')[5].split(newline)[1:]
+
+    for i in range(Opts['@Passes'], -1, -1):
+        pf = Opts['@Levelindicator'] * i
+        if Opts['@Verbose'] >= 1:
+            print "#=============#"
+            print 'reading priority', Opts['@Passes'] - i + 1, "Flag: '%s'" % (pf)
+        # First we expand the files
+        for j in range(Opts['@Passes'], -1, -1):
+            pf2 = Opts['@Levelindicator'] * j
+            Full['TEMPLATE'] = ExpandFiles(Full['TEMPLATE'], i)
+            Full[pf2 + 'ITERABLES'] = ExpandFiles(Full[pf2 + 'ITERABLES'], i)
+            Full[pf2 + 'REFERENCES'] = ExpandFiles(Full[pf2 + 'REFERENCES'], i)
+
+        # After loading files we reprocess the template, which allows you to
+        # put new definitions in the files you reference
+        oFull = ProcessTemplate(oFull)
+
+        # First we have to load the ITERABLES
+        IterDict = LoadIters(Full[pf + 'ITERABLES'])
+
+        # Then we processes ITERABLES
+        for j in range(Opts['@Passes'], -1, -1):
+            pf2 = Opts['@Levelindicator'] * j
+            Full['TEMPLATE'] = ExpandIters(Full['TEMPLATE'], IterDict, i)
+            Full[pf2 + 'FORMS'] = ExpandIters(Full[pf2 + 'FORMS'], IterDict, i)
+            Full[pf2 + 'REFERENCES'] = ExpandIters(Full[pf2 + 'REFERENCES'],
+                                                   IterDict, i)
+
+        # Then we handle FORMS
+
+        # Then we load REFERENCES
+        RefDict = LoadRefs(Full[pf + 'REFERENCES'])
+
+        # Then we replace REFERENCES
+        for j in range(Opts['@Passes'], -1, -1):
+            pf2 = Opts['@Levelindicator'] * j
+            Full['TEMPLATE'] = ExpandRefs(Full['TEMPLATE'], RefDict, i)
+            Full[pf2 + 'ITERABLES'] = ExpandRefs(Full[pf2 + 'ITERABLES'],
+                                                 RefDict, i)
+            Full[pf2 + 'REFERENCES'] = ExpandRefs(Full[pf2 + 'REFERENCES'],
+                                                  RefDict, i)
+
+    output = open(filename.replace('.B', ''), 'w')
+    output.write('\n'.join(Full['TEMPLATE']))
+    output.close()
+
+
+def ProcessTemplate(oFull):
+    global Opts
     for i in oFull.split('@@'):
         options = None
         if i[:5] == 'GUIDE':
@@ -65,51 +121,7 @@ def Process(filename):
     if Opts['@Verbose'] == 4:
         print Full
 
-    #TEMPLATE = Full.split('@@')[2].split(newline)[1:]
-    #ITERABLES = Full.split('@@')[3].split(newline)[1:]
-    #FORMS = Full.split('@@')[4].split(newline)[1:]
-    #REFERENCES = Full.split('@@')[5].split(newline)[1:]
-
-    for i in range(Opts['@Passes'], -1, -1):
-        pf = Opts['@Levelindicator'] * i
-        if Opts['@Verbose'] >= 1:
-            print "#=============#"
-            print 'reading priority', Opts['@Passes'] - i + 1, "Flag: '%s'" % (pf)
-        # First we expand the files
-        for j in range(Opts['@Passes'], -1, -1):
-            pf2 = Opts['@Levelindicator'] * j
-            Full['TEMPLATE'] = ExpandFiles(Full['TEMPLATE'], i)
-            Full[pf2 + 'ITERABLES'] = ExpandFiles(Full[pf2 + 'ITERABLES'], i)
-            Full[pf2 + 'REFERENCES'] = ExpandFiles(Full[pf2 + 'REFERENCES'], i)
-
-        # First we have to load the ITERABLES
-        IterDict = LoadIters(Full[pf + 'ITERABLES'])
-
-        # Then we processes ITERABLES
-        for j in range(Opts['@Passes'], -1, -1):
-            pf2 = Opts['@Levelindicator'] * j
-            Full['TEMPLATE'] = ExpandIters(Full['TEMPLATE'], IterDict, i)
-            Full[pf2 + 'FORMS'] = ExpandIters(Full[pf2 + 'FORMS'], IterDict, i)
-            Full[pf2 + 'REFERENCES'] = ExpandIters(Full[pf2 + 'REFERENCES'],
-                                                   IterDict, i)
-
-        # Then we handle FORMS
-
-        # Then we load REFERENCES
-        RefDict = LoadRefs(Full[pf + 'REFERENCES'])
-
-        # Then we replace REFERENCES
-        for j in range(Opts['@Passes'], -1, -1):
-            pf2 = Opts['@Levelindicator'] * j
-            Full['TEMPLATE'] = ExpandRefs(Full['TEMPLATE'], RefDict, i)
-            Full[pf2 + 'ITERABLES'] = ExpandRefs(Full[pf2 + 'ITERABLES'],
-                                                 RefDict, i)
-            Full[pf2 + 'REFERENCES'] = ExpandRefs(Full[pf2 + 'REFERENCES'],
-                                                  RefDict, i)
-
-    output = open(filename.replace('.B', ''), 'w')
-    output.write('\n'.join(Full['TEMPLATE']))
-    output.close()
+    return oFull
 
 
 def ExpandFiles(TEMPLATE, depth):
