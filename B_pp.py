@@ -52,15 +52,15 @@ def Process(filename):
         print Full
 
     for i in oFull.split('@@')[1:]:
-        Full[i.split('\n')[0]] = i.split('\n')[1:-1]
+        Full[i.split(newline)[0]] = i.split(newline)[1:-1]
         if Opts['@Verbose'] == 3:
-            print i.split('\n')[0]
+            print i.split(newline)[0]
             print '---------------'
-            print i.split('\n')[1:-1]
+            print i.split(newline)[1:-1]
     if 'GUIDE' in Full.keys():
         del Full['GUIDE']
 
-    oFull = '\n'.join(['\n'.join(x) for i in Full.keys() for x in Full[i]])
+    oFull = newline.join([newline.join(x) for i in Full.keys() for x in Full[i]])
 
     if Opts['@Verbose'] == 4:
         print Full
