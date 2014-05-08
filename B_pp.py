@@ -57,6 +57,10 @@ def Process(filename):
             print i.split('\n')[0]
             print '---------------'
             print i.split('\n')[1:-1]
+    if 'GUIDE' in Full.keys():
+        del Full['GUIDE']
+
+    oFull = '\n'.join(['\n'.join(x) for i in Full.keys() for x in Full[i]])
 
     if Opts['@Verbose'] == 4:
         print Full
