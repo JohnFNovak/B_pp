@@ -79,16 +79,15 @@ def ProcessTemplate(text=None, dic=None):
     if text:
         for i in text.split('@@'):
             if i[:5] == 'GUIDE':
-                print 'Loading options from the GUIDE:'
-                print [x for x in i.split(newline)[1:] if x.strip()]
                 options = [x for x in i.split(newline)[1:] if x.strip()]
     if dic:
         if 'GUIDE' in dic:
             options = dic['GUIDE']
     if options:
+        print 'Loading options from the GUIDE:'
         for i in options:
-            print i
-            Opts[i.split(' = ')[0]] = i.split(' = ')[1]
+            Opts[i.split('=')[0].strip()] = i.split('=')[1].strip()
+            print i.split('=')[0].strip(), '=', Opts[i.split('=')[0].strip()]
         if Opts['@Verbose'] >= 1:
             print "Levelindicator:", Opts['@Levelindicator']
         Opts['@Passes'] = int(Opts['@Passes']) - 1
@@ -96,7 +95,8 @@ def ProcessTemplate(text=None, dic=None):
 
     # Full is only empty on the first pass, so we make it
     if text:
-        print "First Pass"
+        if Opts['@Verbose'] >= 1:
+            print "First Pass"
         dic = {'TEMPLATE': ''}
         for i in range(Opts['@Passes'], -1, -1):
             pf = Opts['@Levelindicator'] * i
