@@ -83,7 +83,8 @@ def ProcessTemplate(text=None, dic=None):
         for i in text.split('@@'):
             if i[:5] == 'GUIDE':
                 print 'Loading options from the GUIDE:'
-                options = i.split(newline)[1:-2]
+                print [x for x in i.split(newline) if x.strip()]
+                options = [x for x in i.split(newline) if x.strip()]
     if dic:
         if 'GUIDE' in dic:
             options = dic['GUIDE']
