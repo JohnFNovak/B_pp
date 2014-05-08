@@ -91,11 +91,11 @@ def ProcessTemplate(oFull):
             for i in options:
                 print i
                 Opts[i.split(' = ')[0]] = i.split(' = ')[1]
+            if Opts['@Verbose'] >= 1:
+                print "Levelindicator:", Opts['@Levelindicator']
     Opts['@Passes'] = int(Opts['@Passes']) - 1
     Opts['@Verbose'] = int(Opts['@Verbose'])
 
-    if Opts['@Verbose'] >= 1:
-        print "Levelindicator:", Opts['@Levelindicator']
 
     Full = {}
 
@@ -107,14 +107,13 @@ def ProcessTemplate(oFull):
         Full[pf + 'FORMS'] = ''
 
     if Opts['@Verbose'] == 4:
-        print Full
-        print oFull
+        print 'Full:', Full
+        print 'oFull:', oFull
 
     for i in oFull.split('@@')[1:]:
         Full[i.split(newline)[0]] = i.split(newline)[1:-1]
         if Opts['@Verbose'] == 3:
-            print i.split(newline)[0]
-            print '---------------'
+            print i.split(newline)[0], ':'
             print i.split(newline)[1:-1]
     if 'GUIDE' in Full.keys():
         del Full['GUIDE']
@@ -122,8 +121,8 @@ def ProcessTemplate(oFull):
     oFull = newline.join([newline.join(['@@' + i] + [x for x in Full[i]]) for i in Full.keys()])
 
     if Opts['@Verbose'] == 4:
-        print Full
-        print oFull
+        print 'Full:', Full
+        print 'oFull:', oFull
 
     return oFull
 
