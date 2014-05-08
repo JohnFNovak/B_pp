@@ -94,8 +94,8 @@ def ProcessTemplate(text=None, dic=None):
             Opts[i.split(' = ')[0]] = i.split(' = ')[1]
         if Opts['@Verbose'] >= 1:
             print "Levelindicator:", Opts['@Levelindicator']
+        Opts['@Passes'] = int(Opts['@Passes']) - 1
     Opts['@Verbose'] = int(Opts['@Verbose'])
-    Opts['@Passes'] = int(Opts['@Passes']) - 1
 
     # Full is only empty on the first pass, so we make it
     if text:
