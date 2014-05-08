@@ -110,15 +110,18 @@ def ProcessTemplate(text=None, dic=None):
         return False
 
     if Opts['@Verbose'] == 4:
+        print 'ProcessTemplate: before'
         print 'dic:', dic
         print 'text:'
         print text
 
     for i in text.split('@@')[1:]:
         dic[i.split(newline)[0]] = i.split(newline)[1:]
-        if Opts['@Verbose'] == 3:
-            print i.split(newline)[0], ':'
-            print i.split(newline)[1:]
+    if Opts['@Verbose'] == 3:
+        print 'ProcessTemplate: before'
+        for i in dic:
+            print i
+            print dic[i]
     if 'GUIDE' in dic.keys():
         del dic['GUIDE']
 
@@ -128,9 +131,16 @@ def ProcessTemplate(text=None, dic=None):
     text = newline.join([newline.join(['@@' + i] + [x for x in dic[i]]) for i
                         in dic.keys()])
 
+    if Opts['@Verbose'] == 3:
+        print 'ProcessTemplate: after'
+        for i in dic:
+            print i
+            print dic[i]
     if Opts['@Verbose'] == 4:
+        print 'ProcessTemplate: after'
         print 'dic:', dic
-        print 'text:', text
+        print 'text:'
+        print text
 
     return dic
 
