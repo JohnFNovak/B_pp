@@ -14,7 +14,7 @@ newline = '\n'
 
 global Opts
 Opts = {'@Passes': 5, '@Fdelimeter': '%', '@Levelindicator': '!',
-        '@Verbose': '0'}
+        '@Verbose': 0}
 
 
 def Process(filename):
@@ -25,11 +25,8 @@ def Process(filename):
 
     Full = ProcessTemplate(text=oFull)
 
-    #TEMPLATE = Full.split('@@')[2].split(newline)[1:]
-    #ITERABLES = Full.split('@@')[3].split(newline)[1:]
-    #REFERENCES = Full.split('@@')[5].split(newline)[1:]
-
-    for i in range(Opts['@Passes'], -1, -1):
+    while Opts['@Passes'] > -1:
+        i = Opts['@Passes']
         pf = Opts['@Levelindicator'] * i
         if Opts['@Verbose'] >= 1:
             print "#=============#"
@@ -38,35 +35,36 @@ def Process(filename):
         # First we expand the files
         for j in range(Opts['@Passes'], -1, -1):
             pf2 = Opts['@Levelindicator'] * j
-            Full['TEMPLATE'] = ExpandFiles(Full['TEMPLATE'], i)
-            Full[pf2 + 'ITERABLES'] = ExpandFiles(Full[pf2 + 'ITERABLES'], i)
-            Full[pf2 + 'REFERENCES'] = ExpandFiles(Full[pf2 + 'REFERENCES'], i)
+            keys = ['TEMPLATE', 'OTHER', pf2 + 'ITERABLES', pf2 + 'REFERENCES']
+            for k in keys:
+                if k in Full:
+                    Full[k] = ExpandFiles(Full[k], i)
 
         # After loading files we reprocess the template, which allows you to
         # put new definitions in the files you reference
         Full = ProcessTemplate(dic=Full)
 
         # First we have to load the ITERABLES
-        IterDict = LoadIters(Full[pf + 'ITERABLES'])
-
-        # Then we processes ITERABLES
-        for j in range(Opts['@Passes'], -1, -1):
-            pf2 = Opts['@Levelindicator'] * j
-            Full['TEMPLATE'] = ExpandIters(Full['TEMPLATE'], IterDict, i)
-            Full[pf2 + 'REFERENCES'] = ExpandIters(Full[pf2 + 'REFERENCES'],
-                                                   IterDict, i)
+        if pf + 'ITERABLES' in Full:
+            IterDict = LoadIters(Full[pf + 'ITERABLES'])
+            # Then we processes ITERABLES
+            for j in range(Opts['@Passes'], -1, -1):
+                pf2 = Opts['@Levelindicator'] * j
+                keys = ['TEMPLATE', 'OTHER', pf2 + 'REFERENCES']
+                for k in keys:
+                    if k in Full:
+                        Full[k] = ExpandIters(Full[k], IterDict, i)
 
         # Then we load REFERENCES
-        RefDict = LoadRefs(Full[pf + 'REFERENCES'])
-
-        # Then we replace REFERENCES
-        for j in range(Opts['@Passes'], -1, -1):
-            pf2 = Opts['@Levelindicator'] * j
-            Full['TEMPLATE'] = ExpandRefs(Full['TEMPLATE'], RefDict, i)
-            Full[pf2 + 'ITERABLES'] = ExpandRefs(Full[pf2 + 'ITERABLES'],
-                                                 RefDict, i)
-            Full[pf2 + 'REFERENCES'] = ExpandRefs(Full[pf2 + 'REFERENCES'],
-                                                  RefDict, i)
+        if pf + 'REFERENCES' in Full:
+            RefDict = LoadRefs(Full[pf + 'REFERENCES'])
+            # Then we replace REFERENCES
+            for j in range(Opts['@Passes'], -1, -1):
+                pf2 = Opts['@Levelindicator'] * j
+                keys = ['TEMPLATE', 'OTHER', pf2 + 'ITERABLES']
+                for k in keys:
+                    if k in Full:
+                        Full[k] = ExpandRefs(Full[k], RefDict, i)
         Opts['@Passes'] = int(Opts['@Passes']) - 1
 
     with open(filename.replace('.B', ''), 'w') as output:
@@ -76,13 +74,47 @@ def Process(filename):
 def ProcessTemplate(text=None, dic=None):
     global Opts
     options = None
-    if text:
-        for i in text.split('@@'):
-            if i[:5] == 'GUIDE':
-                options = [x for x in i.split(newline)[1:] if x.strip()]
-    if dic:
-        if 'GUIDE' in dic:
-            options = dic['GUIDE']
+
+    # Full is only empty on the first pass, so we make it
+    if dic:  # If it is not the first pass, we need to remake text first
+        text = newline.join([newline.join(['@@' + i] + [x for x in dic[i]] +
+                            [i + '@@']) for i in dic.keys()])
+    elif not text:
+        print "No values passed to function: ProcessTemplate"
+        return False
+    dic = {}
+
+    if Opts['@Verbose'] == 4:
+        print 'ProcessTemplate: before parsing the text'
+        print 'dic:', dic
+        print 'text:'
+        print text
+
+    key = 'OTHER'
+    depth = 0
+    for i in text.split('\n'):
+        if len(i) > 2 and i[:2] == '@@':
+            if depth == 0:
+                key = i[2:].split(':')[0]
+            depth += 1
+        elif len(i) > 2 and i[-2:] == '@@':
+            depth -= 1
+            if i[:-2] == key and depth == 0:
+                key = 'OTHER'
+        else:
+            if key in dic:
+                dic[key].append(i)
+            else:
+                dic[key] = [i]
+
+    if Opts['@Verbose'] == 4:
+        print 'ProcessTemplate: after parsing the text'
+        print 'dic:', dic
+        print 'text:'
+        print text
+
+    if 'GUIDE' in dic:
+        options = dic['GUIDE']
     if options:
         if int(Opts['@Verbose']) > 1:
             print 'Loading options from the GUIDE:'
@@ -96,32 +128,8 @@ def ProcessTemplate(text=None, dic=None):
         Opts['@Passes'] = int(Opts['@Passes']) - 1
     Opts['@Verbose'] = int(Opts['@Verbose'])
 
-    # Full is only empty on the first pass, so we make it
-    if text:
-        if Opts['@Verbose'] >= 1:
-            print "First Pass"
-        dic = {'TEMPLATE': ''}
-        for i in range(Opts['@Passes'], -1, -1):
-            pf = Opts['@Levelindicator'] * i
-            dic[pf + 'ITERABLES'] = ''
-            dic[pf + 'REFERENCES'] = ''
-    elif dic:  # If it is not the first pass, we need to remake text first
-        text = newline.join([newline.join(['@@' + i] + [x for x in dic[i]]) for
-                            i in dic.keys()])
-    else:
-        print "No values passed to function: ProcessTemplate"
-        return False
-
-    if Opts['@Verbose'] == 4:
-        print 'ProcessTemplate: before'
-        print 'dic:', dic
-        print 'text:'
-        print text
-
-    for i in text.split('@@')[1:]:
-        dic[i.split(newline)[0]] = i.split(newline)[1:]
     if Opts['@Verbose'] == 3:
-        print 'ProcessTemplate: before'
+        print 'ProcessTemplate: before building the dictionary'
         for i in dic:
             print i
             print dic[i]
@@ -129,18 +137,18 @@ def ProcessTemplate(text=None, dic=None):
         del dic['GUIDE']
 
     dic = {key: ([x for x in dic[key] if x.strip()] if key != 'TEMPLATE' else
-           dic[key][:-1]) for key in dic.keys()}
+           dic[key]) for key in dic.keys()}
 
     text = newline.join([newline.join(['@@' + i] + [x for x in dic[i]]) for i
                         in dic.keys()])
 
     if Opts['@Verbose'] == 3:
-        print 'ProcessTemplate: after'
+        print 'ProcessTemplate: after building the dictionary'
         for i in dic:
             print i
             print dic[i]
     if Opts['@Verbose'] == 4:
-        print 'ProcessTemplate: after'
+        print 'ProcessTemplate: after building the dictionary'
         print 'dic:', dic
         print 'text:'
         print text
