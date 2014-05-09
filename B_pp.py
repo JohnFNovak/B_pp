@@ -34,35 +34,36 @@ def Process(filename):
         # First we expand the files
         for j in range(Opts['@Passes'], -1, -1):
             pf2 = Opts['@Levelindicator'] * j
-            Full['TEMPLATE'] = ExpandFiles(Full['TEMPLATE'], i)
-            Full[pf2 + 'ITERABLES'] = ExpandFiles(Full[pf2 + 'ITERABLES'], i)
-            Full[pf2 + 'REFERENCES'] = ExpandFiles(Full[pf2 + 'REFERENCES'], i)
+            keys = ['TEMPLATE', 'OTHER', pf2 + 'ITERABLES', pf2 + 'REFERENCES']
+            for k in keys:
+                if k in Full:
+                    Full[k] = ExpandFiles(Full[k], i)
 
         # After loading files we reprocess the template, which allows you to
         # put new definitions in the files you reference
         Full = ProcessTemplate(dic=Full)
 
         # First we have to load the ITERABLES
-        IterDict = LoadIters(Full[pf + 'ITERABLES'])
-
-        # Then we processes ITERABLES
-        for j in range(Opts['@Passes'], -1, -1):
-            pf2 = Opts['@Levelindicator'] * j
-            Full['TEMPLATE'] = ExpandIters(Full['TEMPLATE'], IterDict, i)
-            Full[pf2 + 'REFERENCES'] = ExpandIters(Full[pf2 + 'REFERENCES'],
-                                                   IterDict, i)
+        if pf + 'ITERABLES' in Full:
+            IterDict = LoadIters(Full[pf + 'ITERABLES'])
+            # Then we processes ITERABLES
+            for j in range(Opts['@Passes'], -1, -1):
+                pf2 = Opts['@Levelindicator'] * j
+                keys = ['TEMPLATE', 'OTHER', pf2 + 'REFERENCES']
+                for k in keys:
+                    if k in Full:
+                        Full[k] = ExpandIters(Full[k], IterDict, i)
 
         # Then we load REFERENCES
-        RefDict = LoadRefs(Full[pf + 'REFERENCES'])
-
-        # Then we replace REFERENCES
-        for j in range(Opts['@Passes'], -1, -1):
-            pf2 = Opts['@Levelindicator'] * j
-            Full['TEMPLATE'] = ExpandRefs(Full['TEMPLATE'], RefDict, i)
-            Full[pf2 + 'ITERABLES'] = ExpandRefs(Full[pf2 + 'ITERABLES'],
-                                                 RefDict, i)
-            Full[pf2 + 'REFERENCES'] = ExpandRefs(Full[pf2 + 'REFERENCES'],
-                                                  RefDict, i)
+        if pf + 'REFERENCES' in Full:
+            RefDict = LoadRefs(Full[pf + 'REFERENCES'])
+            # Then we replace REFERENCES
+            for j in range(Opts['@Passes'], -1, -1):
+                pf2 = Opts['@Levelindicator'] * j
+                keys = ['TEMPLATE', 'OTHER', pf2 + 'ITERABLES']
+                for k in keys:
+                    if k in Full:
+                        Full[k] = ExpandRefs(Full[k], RefDict, i)
         Opts['@Passes'] = int(Opts['@Passes']) - 1
 
     with open(filename.replace('.B', ''), 'w') as output:
