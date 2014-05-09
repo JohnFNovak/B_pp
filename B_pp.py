@@ -25,10 +25,6 @@ def Process(filename):
 
     Full = ProcessTemplate(text=oFull)
 
-    #TEMPLATE = Full.split('@@')[2].split(newline)[1:]
-    #ITERABLES = Full.split('@@')[3].split(newline)[1:]
-    #REFERENCES = Full.split('@@')[5].split(newline)[1:]
-
     for i in range(Opts['@Passes'], -1, -1):
         pf = Opts['@Levelindicator'] * i
         if Opts['@Verbose'] >= 1:
