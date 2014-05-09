@@ -27,12 +27,12 @@ Ultimately this is a python script, so you need python. The magic is in the temp
 The B templates should be named [filename].B.[file ending] . For example Display.B.cpp will turn into Display.cpp post-processing. The upside of this is that syntax highlighting in your editor of choice will work for the template.
 
 ####Whats in a template:
-There are five parts to a template:<br />
+There are four parts to a template:<br />
 -GUIDE<br />
 -TEMPLATE<br />
 -ITERABLES<br />
 -REFERENCES<br />
-Each of these needs to be in capitals and prefaces with two '@' symbols. Example '@@TEMPLATE'
+Each of these needs to be in capitals and prefaces with two '@' symbols. Example '@@TEMPLATE'. At the end of each part, it must be terminated with it's name in capitals followed by two '@' symbols. Example 'TEMPLATE@@'.
 
 #####@@GUIDE
 Here is where properties of the pre-processor can be set. There are currently three options which you can set: the number of passes that the compiler will take, the file delimeter, and the level indicator.<br />
