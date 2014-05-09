@@ -289,14 +289,23 @@ def ExpandIters(Text, Iters, depth):
 
 def LoadRefs(REFERENCES):
     global Opts
-    REFERENCES = '\n'.join(REFERENCES)
-    REFERENCES = REFERENCES.split('@')[1:]
     Refs = {}
+    key = ''
     for i in REFERENCES:
-        j = i.split('\n')
-        if j[-1] == '':
-            j = j[:-1]
-        Refs[j[0][:-1]] = '\n'.join(j[1:])
+        if i[0] == '@':
+            key = i[1:].split(':')[0]
+            Refs[key] = []
+        elif key in Refs:
+            Refs[key].append(i)
+    Refs = {k: '\n'.join([x for x in Refs[k] if x.strip()]) for k in Refs}
+    # REFERENCES = '\n'.join(REFERENCES)
+    # REFERENCES = REFERENCES.split('@')[1:]
+    # Refs = {}
+    # for i in REFERENCES:
+    #     j = i.split('\n')
+    #     if j[-1] == '':
+    #         j = j[:-1]
+    #     Refs[j[0][:-1]] = '\n'.join(j[1:])
     if Opts['@Verbose'] >= 1:
         print "Refs:", Refs
     return Refs
