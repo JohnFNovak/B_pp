@@ -266,7 +266,7 @@ def ExpandIters(Text, Iters, depth):
         for line in Text:  # for every line
             for i in Iters:  # for every iter
                 #print i
-                if pf + '@' + i in line:
+                if pf + '@' + i.split('.')[0] + '.' in line:
                     good = False
                     count = 0
                     for j in range(len(Iters[i][1])):  # for every iteration
