@@ -84,11 +84,14 @@ def ProcessTemplate(text=None, dic=None):
         if 'GUIDE' in dic:
             options = dic['GUIDE']
     if options:
-        print 'Loading options from the GUIDE:'
+        if int(Opts['@Verbose']) > 1:
+            print 'Loading options from the GUIDE:'
         for i in options:
             Opts[i.split('=')[0].strip()] = i.split('=')[1].strip()
-            print i.split('=')[0].strip(), '=', Opts[i.split('=')[0].strip()]
-        if Opts['@Verbose'] >= 1:
+            if int(Opts['@Verbose']) > 1:
+                print i.split('=')[0].strip(), '=',
+                print Opts[i.split('=')[0].strip()]
+        if int(Opts['@Verbose']) > 1:
             print "Levelindicator:", Opts['@Levelindicator']
         Opts['@Passes'] = int(Opts['@Passes']) - 1
     Opts['@Verbose'] = int(Opts['@Verbose'])
