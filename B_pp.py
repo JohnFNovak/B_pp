@@ -14,7 +14,7 @@ newline = '\n'
 
 global Opts
 Opts = {'@Passes': 5, '@Fdelimeter': '%', '@Levelindicator': '!',
-        '@Verbose': '0'}
+        '@Verbose': 0}
 
 
 def Process(filename):
