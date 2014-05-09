@@ -25,7 +25,8 @@ def Process(filename):
 
     Full = ProcessTemplate(text=oFull)
 
-    for i in range(Opts['@Passes'], -1, -1):
+    while Opts['@Passes'] > -1:
+        i = Opts['@Passes']
         pf = Opts['@Levelindicator'] * i
         if Opts['@Verbose'] >= 1:
             print "#=============#"
