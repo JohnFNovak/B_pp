@@ -298,14 +298,6 @@ def LoadRefs(REFERENCES):
         elif key in Refs:
             Refs[key].append(i)
     Refs = {k: '\n'.join([x for x in Refs[k] if x.strip()]) for k in Refs}
-    # REFERENCES = '\n'.join(REFERENCES)
-    # REFERENCES = REFERENCES.split('@')[1:]
-    # Refs = {}
-    # for i in REFERENCES:
-    #     j = i.split('\n')
-    #     if j[-1] == '':
-    #         j = j[:-1]
-    #     Refs[j[0][:-1]] = '\n'.join(j[1:])
     if Opts['@Verbose'] >= 1:
         print "Refs:", Refs
     return Refs
