@@ -8,6 +8,8 @@ GUIDE@@
 
 @list.num@
 
+@list2.letter@
+
 !@num@
 TEMPLATE@@
 
@@ -27,3 +29,10 @@ FORMS@@
 @num:
 Number
 !REFERENCES@@
+
+@@ITERABLES
+@list2(letter):
+a
+b
+c
+ITERABLES@@

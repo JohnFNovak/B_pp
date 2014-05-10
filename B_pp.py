@@ -19,7 +19,9 @@ Opts = {'@Passes': 5, '@Fdelimeter': '%', '@Levelindicator': '!',
 
 def Process(filename):
     global Opts
-    oFull = open(filename, 'r').read()
+    if os.path.isfile(filename):
+        with open(filename, 'r') as f:
+            oFull = f.read()
     if (oFull[0] != '@') or (len(oFull.split(newline)) <= 3):
         print "file", filename, "does not appear to be properly formated"
 
@@ -265,8 +267,8 @@ def ExpandIters(Text, Iters, depth):
         cText = Text
         for line in Text:  # for every line
             for i in Iters:  # for every iter
-                #print i
-                if pf + '@' + i in line:
+                # print i
+                if pf + '@' + i.split('.')[0] + '.' in line:
                     good = False
                     count = 0
                     for j in range(len(Iters[i][1])):  # for every iteration
@@ -275,7 +277,7 @@ def ExpandIters(Text, Iters, depth):
                             nline = line
                             if Opts['@Verbose'] >= 2:
                                 print 'Replacing', line
-                            #print line, j, Iters[i][1][j]
+                            # print line, j, Iters[i][1][j]
                             nline = nline.replace(pf + '@i@', str(j))
                             # for every id in the key
                             for k in range(len(Iters[i][0])):
