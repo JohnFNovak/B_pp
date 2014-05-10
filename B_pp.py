@@ -19,9 +19,15 @@ Opts = {'@Passes': 5, '@Fdelimeter': '%', '@Levelindicator': '!',
 
 def Process(filename):
     global Opts
-    oFull = open(filename, 'r').read()
+    if os.path.isfile(filename):
+        with open(filename, 'r') as f:
+            oFull = f.read()
+    else:
+        print filename, "does not appear to be a file"
+        return False
     if (oFull[0] != '@') or (len(oFull.split(newline)) <= 3):
         print "file", filename, "does not appear to be properly formated"
+        return False
 
     Full = ProcessTemplate(text=oFull)
 
