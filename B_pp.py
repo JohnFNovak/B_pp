@@ -20,13 +20,14 @@ Opts = {'@Passes': 5, '@Fdelimeter': '%', '@Levelindicator': '!',
 
 def Process(filename=None, Full=None):
     global Opts
-    if filename:
-        oFull = getFile(filename)
-        if not oFull:
+    if not Full:
+        if filename:
+            oFull = getFile(filename)
+            if not oFull:
+                return False
+            Full = ProcessTemplate(text=oFull)
+        else:
             return False
-        Full = ProcessTemplate(text=oFull)
-    elif not Full:
-        return False
 
     while Opts['@Passes'] > -1:
         i = Opts['@Passes']
