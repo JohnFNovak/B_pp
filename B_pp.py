@@ -360,7 +360,7 @@ def DoRefExpansion(Full, pf):
 def interact(**kwargs):
     global Opts
     code.InteractiveConsole(locals=dict(globals().items() +
-                                        kwargs.items()).interact()
+                                        kwargs.items())).interact()
     return True
 
 if __name__ == '__main__':
