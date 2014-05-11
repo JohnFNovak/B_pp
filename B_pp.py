@@ -9,6 +9,7 @@
 import sys
 import os
 import re
+import code
 
 newline = '\n'
 
@@ -354,6 +355,13 @@ def DoRefExpansion(Full, pf):
                 if k in Full:
                     Full[k] = ExpandRefs(Full[k], RefDict, i)
     return Full
+
+
+def interact(Full):
+    global Opts
+    code.InteractiveConsole(locals=dict(globals().items() +
+                                        {'Full': Full})).interact()
+    return True
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
