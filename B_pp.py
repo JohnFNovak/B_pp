@@ -357,10 +357,10 @@ def DoRefExpansion(Full, pf):
     return Full
 
 
-def interact(Full):
+def interact(**kwargs):
     global Opts
     code.InteractiveConsole(locals=dict(globals().items() +
-                                        {'Full': Full})).interact()
+                                        kwargs.items()).interact()
     return True
 
 if __name__ == '__main__':
