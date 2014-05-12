@@ -52,6 +52,48 @@ def Process(filename, Full=None):
 
     return True
 
+
+def ProcessInteractive(filename):
+    global Opts
+    oFull = getFile(filename)
+    if not oFull:
+        return False
+    Full = ProcessTemplate(text=oFull)
+
+    command = True
+    while command:
+        command = raw_input('(x,f,i,r,p,?,s,!,g): ')
+        if command == 'x':
+            Examine()
+        if command == 'f':
+            Full = DoFileExpansion(Full)
+        if command == 'i':
+            Full = DoIterExpansion(Full)
+        if command == 'r':
+            Full = DoRefExpansion(Full)
+        if command == 'p':
+            Full = ProcessTemplate(dic=Full)
+        if command == '?':
+            PrintHelp()
+        if command == 's':
+            Opts['@Passes'] = int(Opts['@Passes']) - 1
+        if command == '!':
+            interact(Full=Full)
+        if command == 'g':
+            return Process(filename, Full=Full)
+
+    with open(filename.replace('.B', ''), 'w') as output:
+        output.write('\n'.join(Full['TEMPLATE']))
+
+
+def Examine():
+    pass
+
+
+def PrintHelp():
+    pass
+
+
 def getFile(filename):
     if os.path.isfile(filename):
         with open(filename, 'r') as f:
@@ -372,7 +414,12 @@ def interact(**kwargs):
                                         kwargs.items())).interact()
     return True
 
+
 if __name__ == '__main__':
+    Interactive = '-i' in sys.argv
     if len(sys.argv) > 1:
-        for i in sys.argv[1:]:
-            Process(i)
+        for i in [x for x in sys.argv[1:] if x[0] != '-']:
+            if Interactive:
+                ProcessInteractive(i)
+            else:
+                Process(i)
