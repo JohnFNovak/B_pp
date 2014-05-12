@@ -50,6 +50,7 @@ def Process(filename, Full=None):
     with open(filename.replace('.B', ''), 'w') as output:
         output.write('\n'.join(Full['TEMPLATE']))
 
+    return True
 
 def getFile(filename):
     if os.path.isfile(filename):
