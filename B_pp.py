@@ -27,11 +27,10 @@ def Process(filename, Full=None):
         Full = ProcessTemplate(text=oFull)
 
     while Opts['@Passes'] > -1:
-        i = Opts['@Passes']
-        pf = Opts['@Levelindicator'] * i
+        pf = Opts['@Levelindicator'] * Opts['@Passes']
         if Opts['@Verbose'] >= 1:
             print "#=============#"
-            print 'reading priority', Opts['@Passes'] - i + 1,
+            print 'reading priority', Opts['@Passes'] - Opts['@Passes'] + 1,
             print "Flag: '%s'" % (pf)
         # First we expand the files
         Full = DoFileExpansion(Full)
