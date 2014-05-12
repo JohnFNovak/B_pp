@@ -22,6 +22,8 @@ Opts = {'@Passes': 5, '@Fdelimeter': '%', '@Levelindicator': '!',
 def Process(filename, Full=None):
     global Opts
     if not Full:
+        if not FormatTest(filename):
+            return False
         oFull = getFile(filename)
         if not oFull:
             return False
@@ -56,8 +58,13 @@ def Process(filename, Full=None):
 
 def ProcessInteractive(filename):
     global Opts
+    print "Interactively processing", filename
+    if not FormatTest(filename):
+        print '#=====================#'
+        return False
     oFull = getFile(filename)
     if not oFull:
+        print '#=====================#'
         return False
     Full = ProcessTemplate(text=oFull)
 
