@@ -63,7 +63,7 @@ def ProcessInteractive(filename):
     command = True
     step = 0
     while command:
-        command = raw_input('(x,f,i,r,p,?,s,!,g,q): ') or '.'
+        command = raw_input('(x,f,i,r,p,?,s,!,g,q,w): ') or '.'
         if command == 'x':
             Examine(Full, oFull)
         if command == 'f':
@@ -84,6 +84,9 @@ def ProcessInteractive(filename):
             return Process(filename, Full=Full)
         if command == 'q':
             return True
+        if command == 'w':
+            with open(filename.replace('.B', ''), 'w') as output:
+                output.write('\n'.join(Full['TEMPLATE']))
         if command == '.':
             if step == 0:
                 Full = DoFileExpansion(Full)
