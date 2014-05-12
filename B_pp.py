@@ -22,6 +22,8 @@ Opts = {'@Passes': 5, '@Fdelimeter': '%', '@Levelindicator': '!',
 def Process(filename, Full=None):
     global Opts
     if not Full:
+        if not FormatTest(filename):
+            return False
         oFull = getFile(filename)
         if not oFull:
             return False
@@ -56,8 +58,13 @@ def Process(filename, Full=None):
 
 def ProcessInteractive(filename):
     global Opts
+    print "Interactively processing", filename
+    if not FormatTest(filename):
+        print '#=====================#'
+        return False
     oFull = getFile(filename)
     if not oFull:
+        print '#=====================#'
         return False
     Full = ProcessTemplate(text=oFull)
 
@@ -193,6 +200,41 @@ def getFile(filename):
         print "file", filename, "does not appear to be properly formated"
         return False
     return oFull
+
+
+def FormatTest(filename):
+    global Opts
+    text = getFile(filename)
+
+    key = 'OTHER'
+    error = None
+    breaks = []
+    depth = 0
+    for i in text.split('\n'):
+        if len(i) > 2 and i[:2] == '@@':
+            if depth == 0:
+                key = i[2:].split(':')[0]
+            depth += 1
+            breaks.append(i)
+        elif len(i) > 2 and i[-2:] == '@@':
+            depth -= 1
+            if i[:-2] == key and depth == 0:
+                key = 'OTHER'
+            if depth < 0:
+                error = i[:-2]
+                break
+            breaks.append(i)
+
+    if depth != 0:
+        print filename, "is not properly formated"
+        if depth > 0:
+            print key, "was not properly closed"
+            print 'breaks:', breaks
+        if depth < 0:
+            print "An extra", error, "close tag was found"
+        return False
+
+    return True
 
 
 def ProcessTemplate(text=None, dic=None):
@@ -505,9 +547,13 @@ def interact(**kwargs):
 
 if __name__ == '__main__':
     Interactive = '-i' in sys.argv
+    Test = '-t' in sys.argv
     if len(sys.argv) > 1:
         for i in [x for x in sys.argv[1:] if x[0] != '-']:
-            if Interactive:
-                ProcessInteractive(i)
+            if Test:
+                FormatTest(i)
             else:
-                Process(i)
+                if Interactive:
+                    ProcessInteractive(i)
+                else:
+                    Process(i)
