@@ -331,7 +331,7 @@ def DoFileExpansion(Full):
         keys = ['TEMPLATE', 'OTHER', pf2 + 'ITERABLES', pf2 + 'REFERENCES']
         for k in keys:
             if k in Full:
-                Full[k] = ExpandFiles(Full[k], i)
+                Full[k] = ExpandFiles(Full[k], Opts['@Passes'])
     return Full
 
 
@@ -346,7 +346,7 @@ def DoIterExpansion(Full):
             keys = ['TEMPLATE', 'OTHER', pf2 + 'REFERENCES']
             for k in keys:
                 if k in Full:
-                    Full[k] = ExpandIters(Full[k], IterDict, i)
+                    Full[k] = ExpandIters(Full[k], IterDict, Opts['@Passes'])
     return Full
 
 
@@ -361,7 +361,7 @@ def DoRefExpansion(Full):
             keys = ['TEMPLATE', 'OTHER', pf2 + 'ITERABLES']
             for k in keys:
                 if k in Full:
-                    Full[k] = ExpandRefs(Full[k], RefDict, i)
+                    Full[k] = ExpandRefs(Full[k], RefDict, Opts['@Passes'])
     return Full
 
 
