@@ -10,6 +10,7 @@ import sys
 import os
 import re
 import code
+import subprocess
 
 newline = '\n'
 
@@ -113,6 +114,13 @@ def ProcessInteractive(filename):
         elif command == 'h':
             print "History:"
             print history
+        elif command == 'e':
+            with open('.temp', 'w') as f:
+                f.write(newline.join([newline.join(['@@' + i] + [x for x in
+                        Full[i]] + [i + '@@']) for i in Full.keys()]))
+            subprocess.call(('vim', '.temp'))
+            with open('.temp', 'r') as f:
+                Full = ProcessTemplate(f.read())
         elif command == '.':
             if step == 0:
                 print "Performing file expansion"
