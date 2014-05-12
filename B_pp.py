@@ -103,7 +103,16 @@ def Examine(Full, oFull):
 
 
 def PrintHelp():
-    pass
+    print 'Here are the available options:'
+    print 'x: Examine(), prints out certain values'
+    print 'f: performs file expansion'
+    print 'i: performs iterable expansion'
+    print 'r: performs reference expansion'
+    print 'p: processes the current full template'
+    print 's: steps down a pass. ie: Opts[\'@Passes\'] -= 1'
+    print '!: drops to an interactive shell'
+    print 'g: runs non-interactive file expansion'
+    print 'q: exit'
 
 
 def getFile(filename):
