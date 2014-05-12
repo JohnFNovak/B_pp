@@ -138,7 +138,7 @@ def ProcessInteractive(filename):
                 Opts['@Passes'] = int(Opts['@Passes']) - 1
                 print "->", Opts['@Passes']
             if Opts['@Passes'] < 0:
-                print "Writing out file"
+                print "Writing out file to", filename.replace('.B', '')
                 with open(filename.replace('.B', ''), 'w') as output:
                     output.write('\n'.join(Full['TEMPLATE']))
                 return True
