@@ -62,42 +62,44 @@ def ProcessInteractive(filename):
 
     command = True
     step = 0
+    history = []
     while command:
         print '#=====================#'
         print '[%s]' % Opts['@Levelindicator'] * Opts['@Passes'],
         command = raw_input('(x,f,i,r,p,?,s,!,g,q,w): ') or '.'
+        history.append(command)
         if command == 'x':
             Examine(Full, oFull)
-        if command == 'f':
+        elif command == 'f':
             print "Performing (f)ile expansion"
             Full = DoFileExpansion(Full)
-        if command == 'i':
+        elif command == 'i':
             print "Performing (i)terables expansion"
             Full = DoIterExpansion(Full)
-        if command == 'r':
+        elif command == 'r':
             print "Performing (r)eferences expansion"
             Full = DoRefExpansion(Full)
-        if command == 'p':
+        elif command == 'p':
             print "Re(p)rocessing template"
             Full = ProcessTemplate(dic=Full)
-        if command == '?':
+        elif command == '?':
             PrintHelp()
-        if command == 's':
+        elif command == 's':
             print "(s)tepping down a level. @Passes =", Opts['@Passes'], "->",
             Opts['@Passes'] = int(Opts['@Passes']) - 1
             print Opts['@Passes']
-        if command == '!':
+        elif command == '!':
             interact(Full=Full)
-        if command == 'g':
+        elif command == 'g':
             print "(g)o: Proceeding with non-interactive processing"
             return Process(filename, Full=Full)
-        if command == 'q':
+        elif command == 'q':
             return True
-        if command == 'w':
+        elif command == 'w':
             print "(w)riting out file"
             with open(filename.replace('.B', ''), 'w') as output:
                 output.write('\n'.join(Full['TEMPLATE']))
-        if command == 'v':
+        elif command == 'v':
             v = raw_input('set verbose to (int, 0-5): ').strip()
             try:
                 v = int(v)
@@ -108,7 +110,7 @@ def ProcessInteractive(filename):
         elif command == 'h':
             print "History:"
             print history
-        if command == '.':
+        elif command == '.':
             if step == 0:
                 print "Performing file expansion"
                 Full = DoFileExpansion(Full)
@@ -131,6 +133,8 @@ def ProcessInteractive(filename):
                 return True
             step += 1
             step %= 4
+        else:
+            print "Command not recognized"
 
     with open(filename.replace('.B', ''), 'w') as output:
         output.write('\n'.join(Full['TEMPLATE']))
