@@ -64,7 +64,7 @@ def ProcessInteractive(filename):
     while command:
         command = raw_input('(x,f,i,r,p,?,s,!,g,q): ')
         if command == 'x':
-            Examine()
+            Examine(Full, oFull)
         if command == 'f':
             Full = DoFileExpansion(Full)
         if command == 'i':
@@ -88,8 +88,18 @@ def ProcessInteractive(filename):
         output.write('\n'.join(Full['TEMPLATE']))
 
 
-def Examine():
-    pass
+def Examine(Full, oFull):
+    global Opts
+    print '#===============#'
+    print 'oFull:'
+    print oFull
+    print '#===============#'
+    print 'Full:'
+    print Full
+    print '#===============#'
+    print 'Opts:'
+    print Opts
+    print '#===============#'
 
 
 def PrintHelp():
