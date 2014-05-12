@@ -9,6 +9,8 @@
 import sys
 import os
 import re
+import code
+import subprocess
 
 newline = '\n'
 
@@ -17,8 +19,170 @@ Opts = {'@Passes': 5, '@Fdelimeter': '%', '@Levelindicator': '!',
         '@Verbose': 0}
 
 
-def Process(filename):
+def Process(filename, Full=None):
     global Opts
+    if not Full:
+        oFull = getFile(filename)
+        if not oFull:
+            return False
+        Full = ProcessTemplate(text=oFull)
+
+    while Opts['@Passes'] > -1:
+        pf = Opts['@Levelindicator'] * Opts['@Passes']
+        if Opts['@Verbose'] >= 1:
+            print "#=============#"
+            print 'reading priority', Opts['@Passes'] - Opts['@Passes'] + 1,
+            print "Flag: '%s'" % (pf)
+        # First we expand the files
+        Full = DoFileExpansion(Full)
+
+        # After loading files we reprocess the template, which allows you to
+        # put new definitions in the files you reference
+        Full = ProcessTemplate(dic=Full)
+
+        # First we have to load the ITERABLES
+        Full = DoIterExpansion(Full)
+
+        # Then we load REFERENCES
+        Full = DoRefExpansion(Full)
+
+        Opts['@Passes'] = int(Opts['@Passes']) - 1
+
+    with open(filename.replace('.B', ''), 'w') as output:
+        output.write('\n'.join(Full['TEMPLATE']))
+
+    return True
+
+
+def ProcessInteractive(filename):
+    global Opts
+    oFull = getFile(filename)
+    if not oFull:
+        return False
+    Full = ProcessTemplate(text=oFull)
+
+    command = True
+    step = 0
+    history = []
+    while command:
+        print '#=====================#'
+        print '[%s]' % (Opts['@Levelindicator'] * Opts['@Passes']),
+        command = raw_input('(f,p,i,r,?): ') or '.'
+        history.append(command)
+        if command == 'x':
+            Examine(Full, oFull)
+        elif command == 'f':
+            print "Performing (f)ile expansion"
+            Full = DoFileExpansion(Full)
+        elif command == 'i':
+            print "Performing (i)terables expansion"
+            Full = DoIterExpansion(Full)
+        elif command == 'r':
+            print "Performing (r)eferences expansion"
+            Full = DoRefExpansion(Full)
+        elif command == 'p':
+            print "Re(p)rocessing template"
+            Full = ProcessTemplate(dic=Full)
+        elif command == '?':
+            PrintHelp()
+        elif command == 's':
+            print "(s)tepping down a level. @Passes =", Opts['@Passes'], "->",
+            Opts['@Passes'] = int(Opts['@Passes']) - 1
+            print Opts['@Passes']
+        elif command == '!':
+            interact(Full=Full)
+        elif command == 'g':
+            print "(g)o: Proceeding with non-interactive processing"
+            return Process(filename, Full=Full)
+        elif command == 'q':
+            return True
+        elif command == 'w':
+            print "(w)riting out file"
+            newname = filename.replace('.B', '')
+            newname = raw_input('write to [%s]: ' %
+                                (newname)).strip() or newname
+            with open(newname.replace('.B', ''), 'w') as output:
+                output.write('\n'.join(Full['TEMPLATE']))
+        elif command == 'v':
+            v = raw_input('set verbose to (int, 0-5): ').strip()
+            try:
+                v = int(v)
+                if v >= 0 and v <= 5:
+                    Opts['@Verbose'] = v
+            except ValueError:
+                print "input returned TypeError, command ignored"
+        elif command == 'h':
+            print "History:"
+            print history
+        elif command == 'e':
+            with open('.temp', 'w') as f:
+                f.write(newline.join([newline.join(['@@' + i] + [x for x in
+                        Full[i]] + [i + '@@']) for i in Full.keys()]))
+            subprocess.call(('vim', '.temp'))
+            with open('.temp', 'r') as f:
+                Full = ProcessTemplate(f.read())
+            os.remove('.temp')
+        elif command == '.':
+            if step == 0:
+                print "Performing file expansion"
+                Full = DoFileExpansion(Full)
+            elif step == 1:
+                print "Reprocessing template"
+                Full = ProcessTemplate(dic=Full)
+            elif step == 2:
+                print "Performing iterables expansion"
+                Full = DoIterExpansion(Full)
+            elif step == 3:
+                print "Performing references expansion"
+                Full = DoRefExpansion(Full)
+                print "Stepping down a level. @Passes =", Opts['@Passes'],
+                Opts['@Passes'] = int(Opts['@Passes']) - 1
+                print "->", Opts['@Passes']
+            if Opts['@Passes'] < 0:
+                print "Writing out file to", filename.replace('.B', '')
+                with open(filename.replace('.B', ''), 'w') as output:
+                    output.write('\n'.join(Full['TEMPLATE']))
+                return True
+            step += 1
+            step %= 4
+        else:
+            print "Command not recognized"
+
+    with open(filename.replace('.B', ''), 'w') as output:
+        output.write('\n'.join(Full['TEMPLATE']))
+
+
+def Examine(Full, oFull):
+    global Opts
+    print '#===============#'
+    print 'oFull:'
+    print oFull
+    print '#===============#'
+    print 'Full:'
+    print Full
+    print '#===============#'
+    print 'Opts:'
+    print Opts
+    print '#===============#'
+
+
+def PrintHelp():
+    print """Here are the available options:
+    x: Examine(), prints out certain values
+    f: performs file expansion
+    i: performs iterable expansion
+    r: performs reference expansion
+    p: processes the current full template
+    s: steps down a pass. ie: Opts[\'@Passes\'] -= 1
+    !: drops to an interactive shell
+    g: runs non-interactive file expansion
+    v: allows you to change the verbosity of the output
+    h: prints out the recent command history
+    w: writes the current file to disk
+    q: exit"""
+
+
+def getFile(filename):
     if os.path.isfile(filename):
         with open(filename, 'r') as f:
             oFull = f.read()
@@ -28,53 +192,7 @@ def Process(filename):
     if (oFull[0] != '@') or (len(oFull.split(newline)) <= 3):
         print "file", filename, "does not appear to be properly formated"
         return False
-
-    Full = ProcessTemplate(text=oFull)
-
-    while Opts['@Passes'] > -1:
-        i = Opts['@Passes']
-        pf = Opts['@Levelindicator'] * i
-        if Opts['@Verbose'] >= 1:
-            print "#=============#"
-            print 'reading priority', Opts['@Passes'] - i + 1,
-            print "Flag: '%s'" % (pf)
-        # First we expand the files
-        for j in range(Opts['@Passes'], -1, -1):
-            pf2 = Opts['@Levelindicator'] * j
-            keys = ['TEMPLATE', 'OTHER', pf2 + 'ITERABLES', pf2 + 'REFERENCES']
-            for k in keys:
-                if k in Full:
-                    Full[k] = ExpandFiles(Full[k], i)
-
-        # After loading files we reprocess the template, which allows you to
-        # put new definitions in the files you reference
-        Full = ProcessTemplate(dic=Full)
-
-        # First we have to load the ITERABLES
-        if pf + 'ITERABLES' in Full:
-            IterDict = LoadIters(Full[pf + 'ITERABLES'])
-            # Then we processes ITERABLES
-            for j in range(Opts['@Passes'], -1, -1):
-                pf2 = Opts['@Levelindicator'] * j
-                keys = ['TEMPLATE', 'OTHER', pf2 + 'REFERENCES']
-                for k in keys:
-                    if k in Full:
-                        Full[k] = ExpandIters(Full[k], IterDict, i)
-
-        # Then we load REFERENCES
-        if pf + 'REFERENCES' in Full:
-            RefDict = LoadRefs(Full[pf + 'REFERENCES'])
-            # Then we replace REFERENCES
-            for j in range(Opts['@Passes'], -1, -1):
-                pf2 = Opts['@Levelindicator'] * j
-                keys = ['TEMPLATE', 'OTHER', pf2 + 'ITERABLES']
-                for k in keys:
-                    if k in Full:
-                        Full[k] = ExpandRefs(Full[k], RefDict, i)
-        Opts['@Passes'] = int(Opts['@Passes']) - 1
-
-    with open(filename.replace('.B', ''), 'w') as output:
-        output.write('\n'.join(Full['TEMPLATE']))
+    return oFull
 
 
 def ProcessTemplate(text=None, dic=None):
@@ -336,7 +454,60 @@ def ExpandRefs(Text, Refs, depth):
                     break
     return Text
 
+
+def DoFileExpansion(Full):
+    global Opts
+    for j in range(Opts['@Passes'], -1, -1):
+        pf2 = Opts['@Levelindicator'] * j
+        keys = ['TEMPLATE', 'OTHER', pf2 + 'ITERABLES', pf2 + 'REFERENCES']
+        for k in keys:
+            if k in Full:
+                Full[k] = ExpandFiles(Full[k], Opts['@Passes'])
+    return Full
+
+
+def DoIterExpansion(Full):
+    global Opts
+    pf = Opts['@Levelindicator'] * Opts['@Passes']
+    if pf + 'ITERABLES' in Full:
+        IterDict = LoadIters(Full[pf + 'ITERABLES'])
+        # Then we processes ITERABLES
+        for j in range(Opts['@Passes'], -1, -1):
+            pf2 = Opts['@Levelindicator'] * j
+            keys = ['TEMPLATE', 'OTHER', pf2 + 'REFERENCES']
+            for k in keys:
+                if k in Full:
+                    Full[k] = ExpandIters(Full[k], IterDict, Opts['@Passes'])
+    return Full
+
+
+def DoRefExpansion(Full):
+    global Opts
+    pf = Opts['@Levelindicator'] * Opts['@Passes']
+    if pf + 'REFERENCES' in Full:
+        RefDict = LoadRefs(Full[pf + 'REFERENCES'])
+        # Then we replace REFERENCES
+        for j in range(Opts['@Passes'], -1, -1):
+            pf2 = Opts['@Levelindicator'] * j
+            keys = ['TEMPLATE', 'OTHER', pf2 + 'ITERABLES']
+            for k in keys:
+                if k in Full:
+                    Full[k] = ExpandRefs(Full[k], RefDict, Opts['@Passes'])
+    return Full
+
+
+def interact(**kwargs):
+    global Opts
+    code.InteractiveConsole(locals=dict(globals().items() +
+                                        kwargs.items())).interact()
+    return True
+
+
 if __name__ == '__main__':
+    Interactive = '-i' in sys.argv
     if len(sys.argv) > 1:
-        for i in sys.argv[1:]:
-            Process(i)
+        for i in [x for x in sys.argv[1:] if x[0] != '-']:
+            if Interactive:
+                ProcessInteractive(i)
+            else:
+                Process(i)
