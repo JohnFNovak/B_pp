@@ -97,7 +97,10 @@ def ProcessInteractive(filename):
             return True
         elif command == 'w':
             print "(w)riting out file"
-            with open(filename.replace('.B', ''), 'w') as output:
+            newname = filename.replace('.B', '')
+            newname = raw_input('write to [%s]: ' %
+                                (newname)).strip() or newname
+            with open(newname.replace('.B', ''), 'w') as output:
                 output.write('\n'.join(Full['TEMPLATE']))
         elif command == 'v':
             v = raw_input('set verbose to (int, 0-5): ').strip()
