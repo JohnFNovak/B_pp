@@ -95,6 +95,8 @@ def ProcessInteractive(filename):
                 Full = DoRefExpansion(Full)
                 Opts['@Passes'] = int(Opts['@Passes']) - 1
             if Opts['@Passes'] < 0:
+                with open(filename.replace('.B', ''), 'w') as output:
+                    output.write('\n'.join(Full['TEMPLATE']))
                 return True
             step += 1
             step %= 4
