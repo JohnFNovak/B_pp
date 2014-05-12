@@ -65,7 +65,7 @@ def ProcessInteractive(filename):
     history = []
     while command:
         print '#=====================#'
-        print '[%s]' % Opts['@Levelindicator'] * Opts['@Passes'],
+        print '[%s]' % (Opts['@Levelindicator'] * Opts['@Passes']),
         command = raw_input('(x,f,i,r,p,?,s,!,g,q,w): ') or '.'
         history.append(command)
         if command == 'x':
