@@ -97,6 +97,17 @@ def ProcessInteractive(filename):
             print "(w)riting out file"
             with open(filename.replace('.B', ''), 'w') as output:
                 output.write('\n'.join(Full['TEMPLATE']))
+        if command == 'v':
+            v = raw_input('set verbose to (int, 0-5): ').strip()
+            try:
+                v = int(v)
+                if v >= 0 and v <= 5:
+                    Opts['@Verbose'] = v
+            except ValueError:
+                print "input returned TypeError, command ignored"
+        elif command == 'h':
+            print "History:"
+            print history
         if command == '.':
             if step == 0:
                 print "Performing file expansion"
