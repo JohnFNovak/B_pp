@@ -62,7 +62,7 @@ def ProcessInteractive(filename):
 
     command = True
     while command:
-        command = raw_input('(x,f,i,r,p,?,s,!,g): ')
+        command = raw_input('(x,f,i,r,p,?,s,!,g,q): ')
         if command == 'x':
             Examine()
         if command == 'f':
@@ -81,6 +81,8 @@ def ProcessInteractive(filename):
             interact(Full=Full)
         if command == 'g':
             return Process(filename, Full=Full)
+        if command == 'q':
+            return True
 
     with open(filename.replace('.B', ''), 'w') as output:
         output.write('\n'.join(Full['TEMPLATE']))
