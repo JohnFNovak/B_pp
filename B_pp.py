@@ -40,10 +40,10 @@ def Process(filename, Full=None):
         Full = ProcessTemplate(dic=Full)
 
         # First we have to load the ITERABLES
-        Full = DoIterExpansion(Full, pf)
+        Full = DoIterExpansion(Full)
 
         # Then we load REFERENCES
-        Full = DoRefExpansion(Full, pf)
+        Full = DoRefExpansion(Full)
 
         Opts['@Passes'] = int(Opts['@Passes']) - 1
 
@@ -335,8 +335,9 @@ def DoFileExpansion(Full):
     return Full
 
 
-def DoIterExpansion(Full, pf):
+def DoIterExpansion(Full):
     global Opts
+    pf = Opts['@Levelindicator'] * Opts['@Passes']
     if pf + 'ITERABLES' in Full:
         IterDict = LoadIters(Full[pf + 'ITERABLES'])
         # Then we processes ITERABLES
@@ -349,8 +350,9 @@ def DoIterExpansion(Full, pf):
     return Full
 
 
-def DoRefExpansion(Full, pf):
+def DoRefExpansion(Full):
     global Opts
+    pf = Opts['@Levelindicator'] * Opts['@Passes']
     if pf + 'REFERENCES' in Full:
         RefDict = LoadRefs(Full[pf + 'REFERENCES'])
         # Then we replace REFERENCES
