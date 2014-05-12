@@ -63,41 +63,58 @@ def ProcessInteractive(filename):
     command = True
     step = 0
     while command:
+        print '#=====================#'
+        print '[%s]' % Opts['@Levelindicator'] * Opts['@Passes'],
         command = raw_input('(x,f,i,r,p,?,s,!,g,q,w): ') or '.'
         if command == 'x':
             Examine(Full, oFull)
         if command == 'f':
+            print "Performing (f)ile expansion"
             Full = DoFileExpansion(Full)
         if command == 'i':
+            print "Performing (i)terables expansion"
             Full = DoIterExpansion(Full)
         if command == 'r':
+            print "Performing (r)eferences expansion"
             Full = DoRefExpansion(Full)
         if command == 'p':
+            print "Re(p)rocessing template"
             Full = ProcessTemplate(dic=Full)
         if command == '?':
             PrintHelp()
         if command == 's':
+            print "(s)tepping down a level. @Passes =", Opts['@Passes'], "->",
             Opts['@Passes'] = int(Opts['@Passes']) - 1
+            print Opts['@Passes']
         if command == '!':
             interact(Full=Full)
         if command == 'g':
+            print "(g)o: Proceeding with non-interactive processing"
             return Process(filename, Full=Full)
         if command == 'q':
             return True
         if command == 'w':
+            print "(w)riting out file"
             with open(filename.replace('.B', ''), 'w') as output:
                 output.write('\n'.join(Full['TEMPLATE']))
         if command == '.':
             if step == 0:
+                print "Performing file expansion"
                 Full = DoFileExpansion(Full)
             elif step == 1:
+                print "Reprocessing template"
                 Full = ProcessTemplate(dic=Full)
             elif step == 2:
+                print "Performing iterables expansion"
                 Full = DoIterExpansion(Full)
             elif step == 3:
+                print "Performing references expansion"
                 Full = DoRefExpansion(Full)
+                print "Stepping down a level. @Passes =", Opts['@Passes'],
                 Opts['@Passes'] = int(Opts['@Passes']) - 1
+                print "->", Opts['@Passes']
             if Opts['@Passes'] < 0:
+                print "Writing out file"
                 with open(filename.replace('.B', ''), 'w') as output:
                     output.write('\n'.join(Full['TEMPLATE']))
                 return True
