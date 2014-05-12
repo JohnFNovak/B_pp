@@ -121,6 +121,7 @@ def ProcessInteractive(filename):
             subprocess.call(('vim', '.temp'))
             with open('.temp', 'r') as f:
                 Full = ProcessTemplate(f.read())
+            os.remove('.temp')
         elif command == '.':
             if step == 0:
                 print "Performing file expansion"
