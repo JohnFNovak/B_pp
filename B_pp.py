@@ -320,6 +320,7 @@ def ProcessTemplate(text=None, dic=None):
         print text
 
     if 'GUIDE' in dic:
+        dic['GUIDE'] = [x for x in dic['GUIDE'] if x.split('#')[0].strip()]
         options = dic['GUIDE']
     if options:
         if int(Opts['@Verbose']) > 1:
