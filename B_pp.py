@@ -211,20 +211,22 @@ def FormatTest(filename):
     breaks = []
     depth = 0
     for l, i in enumerate(text.split('\n')):
-        if len(i) > 2 and i[:2] == '@@':
+        trimmed = i.split('#')[0].strip()
+        if len(trimmed) > 2 and trimmed[:2] == '@@':
             if depth == 0:
-                key[0] = i[2:].split(':')[0]
+                key[0] = trimmed[2:].split(':')[0]
                 key[1] = l
             depth += 1
-            breaks.append([i, i[2:], l, depth])
-        elif len(i) > 2 and i[-2:] == '@@':
-            if i[:-2] == key and depth == 0:
+            breaks.append([trimmed, trimmed[2:], l, depth])
+        elif len(trimmed) > 2 and trimmed[-2:] == '@@':
+            depth -= 1
+            if trimmed[:-2] == key and depth == 0:
                 key[0] = 'OTHER'
                 key[1] = l
             # if i[:-2] != key:
             #     print 'Unmatched closed tag found:', i, 'in', key[0], 'block',
             #     print 'started on line', key[1]
-            breaks.append([i, i[:-2], l, depth])
+            breaks.append([trimmed, trimmed[:-2], l, depth])
             depth -= 1
 
     breaks.sort(reverse=True, key=lambda x: [x[-1], -x[-2]])
