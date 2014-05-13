@@ -372,6 +372,11 @@ def ProcessTemplate(text=None, dic=None):
         print 'text:'
         print text
 
+    if not 'TEMPLATE' in dic:
+        print 'KeyError: \'TEMPLATE\' not found in Full'
+        if raw_input('enter interactive shell? (y/n): ').lower()[0] == 'y':
+            interact(**{'Full': dic, 'text': text})
+
     return dic
 
 
