@@ -298,13 +298,14 @@ def ProcessTemplate(text=None, dic=None):
     key = 'OTHER'
     depth = 0
     for i in text.split('\n'):
-        if len(i) > 2 and i[:2] == '@@':
+        trimmed = i.split('#')[0].strip()
+        if len(trimmed) > 2 and trimmed[:2] == '@@':
             if depth == 0:
-                key = i[2:].split(':')[0]
+                key = trimmed[2:].split(':')[0]
             depth += 1
-        elif len(i) > 2 and i[-2:] == '@@':
+        elif len(trimmed) > 2 and trimmed[-2:] == '@@':
             depth -= 1
-            if i[:-2] == key and depth == 0:
+            if trimmed[:-2] == key and depth == 0:
                 key = 'OTHER'
         else:
             if key in dic:
