@@ -60,11 +60,11 @@ def ProcessInteractive(filename):
     global Opts
     print "Interactively processing", filename
     if not FormatTest(filename):
-        print '#=====================#'
+        print 'Failed format test'
         return False
     oFull = getFile(filename)
     if not oFull:
-        print '#=====================#'
+        print 'getFile failed'
         return False
     Full = ProcessTemplate(text=oFull)
 
@@ -205,36 +205,77 @@ def getFile(filename):
 def FormatTest(filename):
     global Opts
     text = getFile(filename)
+    Valid = True
 
-    key = 'OTHER'
-    error = None
+    key = ['OTHER', 0]
     breaks = []
     depth = 0
-    for i in text.split('\n'):
-        if len(i) > 2 and i[:2] == '@@':
+    for l, i in enumerate(text.split('\n')):
+        trimmed = i.split('#')[0].strip()
+        if len(trimmed) > 2 and trimmed[:2] == '@@':
             if depth == 0:
-                key = i[2:].split(':')[0]
+                key[0] = trimmed[2:].split(':')[0]
+                key[1] = l
             depth += 1
-            breaks.append(i)
-        elif len(i) > 2 and i[-2:] == '@@':
+            breaks.append([trimmed, trimmed[2:], l, depth])
+        elif len(trimmed) > 2 and trimmed[-2:] == '@@':
             depth -= 1
-            if i[:-2] == key and depth == 0:
-                key = 'OTHER'
-            if depth < 0:
-                error = i[:-2]
-                break
-            breaks.append(i)
+            if trimmed[:-2] == key and depth == 0:
+                key[0] = 'OTHER'
+                key[1] = l
+            # if i[:-2] != key:
+            #     print 'Unmatched closed tag found:', i, 'in', key[0], 'block',
+            #     print 'started on line', key[1]
+            breaks.append([trimmed, trimmed[:-2], l, depth])
+            depth -= 1
 
-    if depth != 0:
-        print filename, "is not properly formated"
-        if depth > 0:
-            print key, "was not properly closed"
-            print 'breaks:', breaks
-        if depth < 0:
-            print "An extra", error, "close tag was found"
-        return False
+    breaks.sort(reverse=True, key=lambda x: [x[-1], -x[-2]])
+    while len(breaks) > 1:
+        breaks.sort(key=lambda x: [x[-1], -x[-2]])
+        key = breaks.pop()
+        if breaks[-1][1] == key[1]:
+            # This is what should happen, the next break is the exit
+            del(breaks[-1])
+        else:
+            if depth > 0:
+                print key[1], 'block not properly closed. Opened line', key[2]
+                # breaks.sort(reverse=True, key=lambda x: [x[-1], -x[-2]])
+                # for i in breaks:
+                #     print i
+                # print 'updating depths?'
+                breaks = [x[:3] + [x[3] - 1] if x[2] > key[2]
+                          else x for x in breaks]
+                depth -= 1
+                # breaks.sort(reverse=True, key=lambda x: [x[-1], -x[-2]])
+                # for i in breaks:
+                #     print i
+            elif depth < 0:
+                if key[1] + '@@' in [x[0] for x in breaks]:
+                    # The exit break exists, but there is other stuff too
+                    i = len(breaks) - [x[0] for x in
+                                       breaks][-1::-1].index(key[1] + '@@') - 1
+                    # print 'Matching break found for', key[1],
+                    # print 'index', i - len(breaks)
+                    # print breaks[i - len(breaks)]
+                    for index, j in enumerate(breaks[i - len(breaks) + 1:]):
+                        # print "\t", i - len(breaks) + index + 1, ',', j
+                        print 'Extra', j[1], 'close tag found on line', j[2],
+                        print 'in', key[1], 'block opened on line', key[2]
+                        depth += 1
+                    del(breaks[i - len(breaks) + 2:])
+                else:
+                    # The exit break does not exsit
+                    print 'Error:', key[1], 'block not closed. Opened line',
+                    print key[2]
+                # sys.exit(1)
+            Valid = False
 
-    return True
+    if depth > 0:
+        print breaks[0][1], 'block not properly closed. Opened line',
+        print breaks[0][2]
+        Valid = False
+
+    return Valid
 
 
 def ProcessTemplate(text=None, dic=None):
@@ -259,13 +300,14 @@ def ProcessTemplate(text=None, dic=None):
     key = 'OTHER'
     depth = 0
     for i in text.split('\n'):
-        if len(i) > 2 and i[:2] == '@@':
+        trimmed = i.split('#')[0].strip()
+        if len(trimmed) > 2 and trimmed[:2] == '@@':
             if depth == 0:
-                key = i[2:].split(':')[0]
+                key = trimmed[2:].split(':')[0]
             depth += 1
-        elif len(i) > 2 and i[-2:] == '@@':
+        elif len(trimmed) > 2 and trimmed[-2:] == '@@':
             depth -= 1
-            if i[:-2] == key and depth == 0:
+            if trimmed[:-2] == key and depth == 0:
                 key = 'OTHER'
         else:
             if key in dic:
@@ -280,6 +322,7 @@ def ProcessTemplate(text=None, dic=None):
         print text
 
     if 'GUIDE' in dic:
+        dic['GUIDE'] = [x for x in dic['GUIDE'] if x.split('#')[0].strip()]
         options = dic['GUIDE']
     if options:
         if int(Opts['@Verbose']) > 1:
@@ -302,8 +345,8 @@ def ProcessTemplate(text=None, dic=None):
     if 'GUIDE' in dic.keys():
         del dic['GUIDE']
 
-    dic = {key: ([x for x in dic[key] if x.strip()] if key != 'TEMPLATE' else
-           dic[key]) for key in dic.keys()}
+    dic = {key: ([x for x in dic[key] if x.split('#')[0].strip()] if key !=
+           'TEMPLATE' else dic[key]) for key in dic.keys()}
 
     text = newline.join([newline.join(['@@' + i] + [x for x in dic[i]]) for i
                         in dic.keys()])
@@ -406,7 +449,7 @@ def LoadIters(ITERABLES):
     ITERABLES = ITERABLES.split('@')[1:]
     IDict = {}
     for i in ITERABLES:
-        j = [x for x in i.split('\n') if x.strip()]
+        j = [x for x in [y.split('#')[0].strip() for y in i.split('\n')] if x]
         if len(j[0].split('(')[1][:-2].split(',')) == 1:
             IDict[j[0].split('(')[0]] = [j[0].split('(')[1][:-2].split(
                                          ','), map(lambda x: [x], j[1:])]
@@ -471,7 +514,8 @@ def LoadRefs(REFERENCES):
             Refs[key] = []
         elif key in Refs:
             Refs[key].append(i)
-    Refs = {k: '\n'.join([x for x in Refs[k] if x.strip()]) for k in Refs}
+    Refs = {k: '\n'.join([x for x in [y.split('#')[0] for y in Refs[k]]
+            if x.strip()]) for k in Refs}
     if Opts['@Verbose'] >= 1:
         print "Refs:", Refs
     return Refs
