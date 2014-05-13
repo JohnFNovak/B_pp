@@ -60,11 +60,11 @@ def ProcessInteractive(filename):
     global Opts
     print "Interactively processing", filename
     if not FormatTest(filename):
-        print '#=====================#'
+        print 'Failed format test'
         return False
     oFull = getFile(filename)
     if not oFull:
-        print '#=====================#'
+        print 'getFile failed'
         return False
     Full = ProcessTemplate(text=oFull)
 
