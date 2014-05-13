@@ -449,7 +449,7 @@ def LoadIters(ITERABLES):
     ITERABLES = ITERABLES.split('@')[1:]
     IDict = {}
     for i in ITERABLES:
-        j = [x for x in i.split('\n') if x.strip()]
+        j = [x for x in [y.split('#')[0].strip() for y in i.split('\n')] if x]
         if len(j[0].split('(')[1][:-2].split(',')) == 1:
             IDict[j[0].split('(')[0]] = [j[0].split('(')[1][:-2].split(
                                          ','), map(lambda x: [x], j[1:])]
