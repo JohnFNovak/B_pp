@@ -206,32 +206,69 @@ def FormatTest(filename):
     global Opts
     text = getFile(filename)
 
-    key = 'OTHER'
-    error = None
+    key = ['OTHER', 0]
     breaks = []
     depth = 0
-    for i in text.split('\n'):
+    for l, i in enumerate(text.split('\n')):
         if len(i) > 2 and i[:2] == '@@':
             if depth == 0:
-                key = i[2:].split(':')[0]
+                key[0] = i[2:].split(':')[0]
+                key[1] = l
             depth += 1
-            breaks.append(i)
+            breaks.append([i, i[2:], l, depth])
         elif len(i) > 2 and i[-2:] == '@@':
-            depth -= 1
             if i[:-2] == key and depth == 0:
-                key = 'OTHER'
-            if depth < 0:
-                error = i[:-2]
-                break
-            breaks.append(i)
+                key[0] = 'OTHER'
+                key[1] = l
+            # if i[:-2] != key:
+            #     print 'Unmatched closed tag found:', i, 'in', key[0], 'block',
+            #     print 'started on line', key[1]
+            breaks.append([i, i[:-2], l, depth])
+            depth -= 1
 
-    if depth != 0:
-        print filename, "is not properly formated"
-        if depth > 0:
-            print key, "was not properly closed"
-            print 'breaks:', breaks
-        if depth < 0:
-            print "An extra", error, "close tag was found"
+    breaks.sort(reverse=True, key=lambda x: [x[-1], -x[-2]])
+    while len(breaks) > 1:
+        breaks.sort(key=lambda x: [x[-1], -x[-2]])
+        key = breaks.pop()
+        if breaks[-1][1] == key[1]:
+            # This is what should happen, the next break is the exit
+            del(breaks[-1])
+        else:
+            if depth > 0:
+                print key[1], 'block not properly closed. Opened line', key[2]
+                # breaks.sort(reverse=True, key=lambda x: [x[-1], -x[-2]])
+                # for i in breaks:
+                #     print i
+                # print 'updating depths?'
+                breaks = [x[:3] + [x[3] - 1] if x[2] > key[2]
+                          else x for x in breaks]
+                depth -= 1
+                # breaks.sort(reverse=True, key=lambda x: [x[-1], -x[-2]])
+                # for i in breaks:
+                #     print i
+            elif depth < 0:
+                if key[1] + '@@' in [x[0] for x in breaks]:
+                    # The exit break exists, but there is other stuff too
+                    i = len(breaks) - [x[0] for x in
+                                       breaks][-1::-1].index(key[1] + '@@') - 1
+                    # print 'Matching break found for', key[1],
+                    # print 'index', i - len(breaks)
+                    # print breaks[i - len(breaks)]
+                    for index, j in enumerate(breaks[i - len(breaks) + 1:]):
+                        # print "\t", i - len(breaks) + index + 1, ',', j
+                        print 'Extra', j[1], 'close tag found on line', j[2],
+                        print 'in', key[1], 'block opened on line', key[2]
+                        depth += 1
+                    del(breaks[i - len(breaks) + 2:])
+                else:
+                    # The exit break does not exsit
+                    print 'Error:', key[1], 'block not closed. Opened line',
+                    print key[2]
+                # sys.exit(1)
+
+    if depth > 0:
+        print breaks[0][1], 'block not properly closed. Opened line',
+        print breaks[0][2]
         return False
 
     return True
