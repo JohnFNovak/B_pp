@@ -60,11 +60,11 @@ def ProcessInteractive(filename):
     global Opts
     print "Interactively processing", filename
     if not FormatTest(filename):
-        print '#=====================#'
+        print 'Failed format test'
         return False
     oFull = getFile(filename)
     if not oFull:
-        print '#=====================#'
+        print 'getFile failed'
         return False
     Full = ProcessTemplate(text=oFull)
 
@@ -211,20 +211,22 @@ def FormatTest(filename):
     breaks = []
     depth = 0
     for l, i in enumerate(text.split('\n')):
-        if len(i) > 2 and i[:2] == '@@':
+        trimmed = i.split('#')[0].strip()
+        if len(trimmed) > 2 and trimmed[:2] == '@@':
             if depth == 0:
-                key[0] = i[2:].split(':')[0]
+                key[0] = trimmed[2:].split(':')[0]
                 key[1] = l
             depth += 1
-            breaks.append([i, i[2:], l, depth])
-        elif len(i) > 2 and i[-2:] == '@@':
-            if i[:-2] == key and depth == 0:
+            breaks.append([trimmed, trimmed[2:], l, depth])
+        elif len(trimmed) > 2 and trimmed[-2:] == '@@':
+            depth -= 1
+            if trimmed[:-2] == key and depth == 0:
                 key[0] = 'OTHER'
                 key[1] = l
             # if i[:-2] != key:
             #     print 'Unmatched closed tag found:', i, 'in', key[0], 'block',
             #     print 'started on line', key[1]
-            breaks.append([i, i[:-2], l, depth])
+            breaks.append([trimmed, trimmed[:-2], l, depth])
             depth -= 1
 
     breaks.sort(reverse=True, key=lambda x: [x[-1], -x[-2]])
@@ -298,13 +300,14 @@ def ProcessTemplate(text=None, dic=None):
     key = 'OTHER'
     depth = 0
     for i in text.split('\n'):
-        if len(i) > 2 and i[:2] == '@@':
+        trimmed = i.split('#')[0].strip()
+        if len(trimmed) > 2 and trimmed[:2] == '@@':
             if depth == 0:
-                key = i[2:].split(':')[0]
+                key = trimmed[2:].split(':')[0]
             depth += 1
-        elif len(i) > 2 and i[-2:] == '@@':
+        elif len(trimmed) > 2 and trimmed[-2:] == '@@':
             depth -= 1
-            if i[:-2] == key and depth == 0:
+            if trimmed[:-2] == key and depth == 0:
                 key = 'OTHER'
         else:
             if key in dic:
@@ -319,6 +322,7 @@ def ProcessTemplate(text=None, dic=None):
         print text
 
     if 'GUIDE' in dic:
+        dic['GUIDE'] = [x for x in dic['GUIDE'] if x.split('#')[0].strip()]
         options = dic['GUIDE']
     if options:
         if int(Opts['@Verbose']) > 1:
@@ -341,8 +345,8 @@ def ProcessTemplate(text=None, dic=None):
     if 'GUIDE' in dic.keys():
         del dic['GUIDE']
 
-    dic = {key: ([x for x in dic[key] if x.strip()] if key != 'TEMPLATE' else
-           dic[key]) for key in dic.keys()}
+    dic = {key: ([x for x in dic[key] if x.split('#')[0].strip()] if key !=
+           'TEMPLATE' else dic[key]) for key in dic.keys()}
 
     text = newline.join([newline.join(['@@' + i] + [x for x in dic[i]]) for i
                         in dic.keys()])
@@ -445,7 +449,7 @@ def LoadIters(ITERABLES):
     ITERABLES = ITERABLES.split('@')[1:]
     IDict = {}
     for i in ITERABLES:
-        j = [x for x in i.split('\n') if x.strip()]
+        j = [x for x in [y.split('#')[0].strip() for y in i.split('\n')] if x]
         if len(j[0].split('(')[1][:-2].split(',')) == 1:
             IDict[j[0].split('(')[0]] = [j[0].split('(')[1][:-2].split(
                                          ','), map(lambda x: [x], j[1:])]
@@ -510,7 +514,8 @@ def LoadRefs(REFERENCES):
             Refs[key] = []
         elif key in Refs:
             Refs[key].append(i)
-    Refs = {k: '\n'.join([x for x in Refs[k] if x.strip()]) for k in Refs}
+    Refs = {k: '\n'.join([x for x in [y.split('#')[0] for y in Refs[k]]
+            if x.strip()]) for k in Refs}
     if Opts['@Verbose'] >= 1:
         print "Refs:", Refs
     return Refs
