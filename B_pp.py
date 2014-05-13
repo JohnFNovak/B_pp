@@ -205,6 +205,7 @@ def getFile(filename):
 def FormatTest(filename):
     global Opts
     text = getFile(filename)
+    Valid = True
 
     key = ['OTHER', 0]
     breaks = []
@@ -265,13 +266,14 @@ def FormatTest(filename):
                     print 'Error:', key[1], 'block not closed. Opened line',
                     print key[2]
                 # sys.exit(1)
+            Valid = False
 
     if depth > 0:
         print breaks[0][1], 'block not properly closed. Opened line',
         print breaks[0][2]
-        return False
+        Valid = False
 
-    return True
+    return Valid
 
 
 def ProcessTemplate(text=None, dic=None):
