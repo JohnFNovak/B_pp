@@ -236,6 +236,9 @@ def FormatTest(filename):
             # This is what should happen, the next break is the exit
             del(breaks[-1])
         else:
+            if Valid:
+                print 'file:', filename, 'is not properly formated'
+            Valid = False
             if depth > 0:
                 print key[1], 'block not properly closed. Opened line', key[2]
                 # breaks.sort(reverse=True, key=lambda x: [x[-1], -x[-2]])
@@ -267,9 +270,10 @@ def FormatTest(filename):
                     print 'Error:', key[1], 'block not closed. Opened line',
                     print key[2]
                 # sys.exit(1)
-            Valid = False
 
     if depth > 0:
+        if Valid:
+            print 'file:', filename, 'is not properly formated'
         print breaks[0][1], 'block not properly closed. Opened line',
         print breaks[0][2]
         Valid = False
