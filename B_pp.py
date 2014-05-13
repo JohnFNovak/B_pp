@@ -123,8 +123,7 @@ def ProcessInteractive(filename):
             print history
         elif command == 'e':
             with open('.temp', 'w') as f:
-                f.write(newline.join([newline.join(['@@' + i] + [x for x in
-                        Full[i]] + [i + '@@']) for i in Full.keys()]))
+                f.write(to_text(Full))
             subprocess.call(('vim', '.temp'))
             with open('.temp', 'r') as f:
                 Full = ProcessTemplate(f.read())
@@ -278,19 +277,21 @@ def FormatTest(filename):
     return Valid
 
 
+def to_text(Full):
+    text = newline.join([newline.join(['@@' + i] +
+                         [x for x in Full[i]] +
+                         [i + '@@']) if i != 'OTHER' else newline.join(Full[i])
+                        for i in Full.keys()])
+    return text
+
+
 def ProcessTemplate(text=None, dic=None):
     global Opts
     options = None
 
     # Full is only empty on the first pass, so we make it
     if dic:  # If it is not the first pass, we need to remake text first
-        text = newline.join([
-                            newline.join(['@@' + i] + [x for x in dic[i]] + [i
-                                         + '@@'])
-                            if i != 'OTHER'
-                            else newline.join(dic[i])
-                            for i in dic.keys()
-                            ])
+        text = to_text(dic)
     elif not text:
         print "No values passed to function: ProcessTemplate"
         return False
@@ -353,13 +354,7 @@ def ProcessTemplate(text=None, dic=None):
     dic = {key: ([x for x in dic[key] if x.split('#')[0].strip()] if key !=
            'TEMPLATE' else dic[key]) for key in dic.keys()}
 
-    text = newline.join([
-                        newline.join(['@@' + i] + [x for x in dic[i]] + [i
-                                     + '@@'])
-                        if i != 'OTHER'
-                        else newline.join(dic[i])
-                        for i in dic.keys()
-                        ])
+    text = to_text(dic)
 
     if Opts['@Verbose'] == 3:
         print 'ProcessTemplate: after building the dictionary'
