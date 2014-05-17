@@ -589,7 +589,7 @@ def interact(**kwargs):
     return True
 
 
-if __name__ == '__main__':
+def main():
     Interactive = '-i' in sys.argv
     Test = '-t' in sys.argv
     if len(sys.argv) > 1:
@@ -601,3 +601,6 @@ if __name__ == '__main__':
                     ProcessInteractive(i)
                 else:
                     Process(i)
+
+if __name__ == '__main__':
+    main()
