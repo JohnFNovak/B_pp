@@ -606,6 +606,26 @@ def interact(**kwargs):
 def main():
     Interactive = '-i' in sys.argv
     Test = '-t' in sys.argv
+    if '-h' in [x[:2] for x in sys.argv] or '--help' in sys.argv:
+        print """
+the B Preprocessor
+
+This is a template processor which is designed for preprocessing code templates
+before being compiled. For details https://github.com/JohnFNovak/B_pp
+
+usage: $ B <template1> <template2> <template3> ...
+
+Compiling a template name template.B.ftype will compile to template.ftype
+
+Flags:
+    -i : the template processor will start in interactive mode. The processor
+            will load into an interactive prompt. A python shell can be
+            accessed via a '!' command at the prompt. '?' will print more help
+    -t : the template processor will run in 'test' mode. Templates will not be
+            compiled. Templates will only be checked for valid format. output
+            will only be returned if errors are found. This is useful when
+            batch testing the validity of templates.
+        """
     if len(sys.argv) > 1:
         for i in [x for x in sys.argv[1:] if x[0] != '-']:
             if Test:
