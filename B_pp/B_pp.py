@@ -625,6 +625,97 @@ Flags:
             compiled. Templates will only be checked for valid format. output
             will only be returned if errors are found. This is useful when
             batch testing the validity of templates.
+
+Format:
+    For detailed information go to https://github.com/JohnFNovak/B_pp
+
+    This abridged guide does not address order of operations, multiple level
+        processing, nested templates, or the interactive mode. For information
+        on that, please refer to the online references.
+
+    Templates can contain four types of blocks: GUIDE, ITERABLES, and
+        REFERENCES, TEMPLATE. Each block must begin with a line which says
+        @@NAME and end with a line which says NAME@@ where NAME is one of the
+        four types. In addition to the four block types, files can be included
+        inline.
+
+        File inclusion:
+            Files are treated as strings. File representation is done as
+                %<path_to_file/file.txt>%, where at compilation the contents of
+                file.txt will loaded and %<path_to_file/file.txt>% will be
+                replaced by the file contents. The '%' bookends are defaults,
+                but any string can be used and is defined by the @Fdelimeter
+                option in the GUIDE block (see next).
+
+        GUIDE:
+            The GUIDE block sets compilation options. Currently there are four.
+            These are the current options and their defaults. To set them in a
+            template they must we written @Name = <value> in the guide section.
+                @Passes = 5
+                @Fdelimeter = %
+                @Levelindicator = !
+                @Verbose = 0
+        ITERABLES:
+            Iterables are lists of sets of strings. In the iterables seciton
+            iterables are defined as
+                @Name(prop1, prop2, ...):
+                thing1_prop1 thing1_prop2 ...
+                thing2_prop1 thing2_prop2 ...
+                ...
+            Iterables can be arbitrarily long and can have arbitrarily many
+                properties.
+            When referenced in the TEMPLATE block an iterable is referenced as
+                line in code blah_blah_blah @Name.propname@ continues with code
+            The line will get copied once for each entry in the iterable, and
+                the string @Name.propname@ will be replaced with the value
+                from iterable Name, with property name propname.
+            If an iterable is referenced more than one in a signle line, all of
+                the instances will be replaced at the same time.
+
+                ex:
+                @List(num, letter):
+                5 a
+                6 b
+                7 c
+
+                Then the line:
+                    Test line @List.num@ more filler @List.letter@
+                Will compile to:
+                    Test line 5 more filler a
+                    Test line 6 more filler b
+                    Test line 7 more filler c
+
+            The special iterable @i@ will be replaced by the count of the
+                iteration.
+                With the previous example:
+                    The line:
+                        @i@ Test line @List.num@ more filler @List.letter@
+                    Will compile to:
+                        1 Test line 5 more filler a
+                        2 Test line 6 more filler b
+                        3 Test line 7 more filler c
+
+        REFERENCES:
+            Refernces are strings which are replaced at compilation. Refernces
+            are defined in the REFERENCES block as:
+                @Refname:
+                string to replace
+            Then, any instance of @Refname@ in the TEMPLATE block will compile
+                to "string to replace"
+
+            ex:
+            @ref1:
+            just an example
+
+            Then the line:
+                test line @ref1@ more filler
+            Will compile to:
+                test line just an example more filler
+
+        TEMPLATE:
+            The template block is the part of the template which is compiled
+            into the final result. Refernces and iterables are expanded and the
+            result is printed out to file.
         """
     if len(sys.argv) > 1:
         for i in [x for x in sys.argv[1:] if x[0] != '-']:
