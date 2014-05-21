@@ -601,8 +601,7 @@ def interact(**kwargs):
 
 
 def PrintExample():
-    print """
-@@GUIDE
+    print """@@GUIDE
 # These are the default values
 @Passes = 5
 @Fdelimeter = %
