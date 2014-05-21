@@ -195,9 +195,6 @@ def getFile(filename):
     else:
         print filename, "does not appear to be a file"
         return False
-    if (oFull[0] != '@') or (len(oFull.split(newline)) <= 3):
-        print "file", filename, "does not appear to be properly formated"
-        return False
     return oFull
 
 
