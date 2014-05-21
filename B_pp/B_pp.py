@@ -603,9 +603,46 @@ def interact(**kwargs):
     return True
 
 
+def PrintExample():
+    print """
+@@GUIDE
+# These are the default values
+@Passes = 5
+@Fdelimeter = %
+@Levelindicator = !
+@Verbose = 0
+GUIDE@@
+
+@@TEMPLATE
+This is just an example
+Comments can be included in templates. Any comment in the TEMPLATE block will
+be preserved. Lines beginning with '#' will be ignored and anything after '#'
+in a line will also be ignored.
+
+This is an example of a @ref@.
+
+This is an example of an iterable: @list.num@ and @list.letter@
+TEMPLATE@@
+
+@@ITERABLES
+@list(num, letter):
+1 a
+2 b
+3 c
+ITERABLES@@
+
+@@REFERENCES
+@ref:
+reference. References are string replacements
+REFERENCES@@
+    """
+
+
 def main():
     Interactive = '-i' in sys.argv
     Test = '-t' in sys.argv
+    if '-p' in sys.argv:
+        PrintExample()
     if '-h' in [x[:2] for x in sys.argv] or '--help' in sys.argv:
         print """
 the B Preprocessor
@@ -625,6 +662,7 @@ Flags:
             compiled. Templates will only be checked for valid format. output
             will only be returned if errors are found. This is useful when
             batch testing the validity of templates.
+    -p : prints an example template to standard out.
 
 Format:
     For detailed information go to https://github.com/JohnFNovak/B_pp
