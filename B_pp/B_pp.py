@@ -726,6 +726,8 @@ Format:
                     ProcessInteractive(i)
                 else:
                     Process(i)
+    else:
+        print "No files given. -h or --help flag for help."
 
 if __name__ == '__main__':
     main()
