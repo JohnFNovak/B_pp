@@ -621,7 +621,7 @@ This is an example of an iterable: @list.num@ and @list.letter@
 TEMPLATE@@
 
 @@ITERABLES
-@list(num, letter):
+@list(num,letter):
 1 a
 2 b
 3 c
