@@ -123,8 +123,7 @@ def ProcessInteractive(filename):
             print history
         elif command == 'e':
             with open('.temp', 'w') as f:
-                f.write(newline.join([newline.join(['@@' + i] + [x for x in
-                        Full[i]] + [i + '@@']) for i in Full.keys()]))
+                f.write(to_text(Full))
             subprocess.call(('vim', '.temp'))
             with open('.temp', 'r') as f:
                 Full = ProcessTemplate(f.read())
@@ -196,9 +195,6 @@ def getFile(filename):
     else:
         print filename, "does not appear to be a file"
         return False
-    if (oFull[0] != '@') or (len(oFull.split(newline)) <= 3):
-        print "file", filename, "does not appear to be properly formated"
-        return False
     return oFull
 
 
@@ -237,6 +233,9 @@ def FormatTest(filename):
             # This is what should happen, the next break is the exit
             del(breaks[-1])
         else:
+            if Valid:
+                print 'file:', filename, 'is not properly formated'
+            Valid = False
             if depth > 0:
                 print key[1], 'block not properly closed. Opened line', key[2]
                 # breaks.sort(reverse=True, key=lambda x: [x[-1], -x[-2]])
@@ -268,14 +267,23 @@ def FormatTest(filename):
                     print 'Error:', key[1], 'block not closed. Opened line',
                     print key[2]
                 # sys.exit(1)
-            Valid = False
 
     if depth > 0:
+        if Valid:
+            print 'file:', filename, 'is not properly formated'
         print breaks[0][1], 'block not properly closed. Opened line',
         print breaks[0][2]
         Valid = False
 
     return Valid
+
+
+def to_text(Full):
+    text = newline.join([newline.join(['@@' + i] +
+                         [x for x in Full[i]] +
+                         [i + '@@']) if i != 'OTHER' else newline.join(Full[i])
+                        for i in Full.keys()])
+    return text
 
 
 def ProcessTemplate(text=None, dic=None):
@@ -284,13 +292,7 @@ def ProcessTemplate(text=None, dic=None):
 
     # Full is only empty on the first pass, so we make it
     if dic:  # If it is not the first pass, we need to remake text first
-        text = newline.join([
-                            newline.join(['@@' + i] + [x for x in dic[i]] + [i
-                                         + '@@'])
-                            if i != 'OTHER'
-                            else newline.join(dic[i])
-                            for i in dic.keys()
-                            ])
+        text = to_text(dic)
     elif not text:
         print "No values passed to function: ProcessTemplate"
         return False
@@ -353,13 +355,7 @@ def ProcessTemplate(text=None, dic=None):
     dic = {key: ([x for x in dic[key] if x.split('#')[0].strip()] if key !=
            'TEMPLATE' else dic[key]) for key in dic.keys()}
 
-    text = newline.join([
-                        newline.join(['@@' + i] + [x for x in dic[i]] + [i
-                                     + '@@'])
-                        if i != 'OTHER'
-                        else newline.join(dic[i])
-                        for i in dic.keys()
-                        ])
+    text = to_text(dic)
 
     if Opts['@Verbose'] == 3:
         print 'ProcessTemplate: after building the dictionary'
@@ -604,9 +600,157 @@ def interact(**kwargs):
     return True
 
 
+def PrintExample():
+    print """@@GUIDE
+# These are the default values
+@Passes = 5
+@Fdelimeter = %
+@Levelindicator = !
+@Verbose = 0
+GUIDE@@
+
+@@TEMPLATE
+This is just an example
+Comments can be included in templates. Any comment in the TEMPLATE block will
+be preserved. Lines beginning with '#' will be ignored and anything after '#'
+in a line will also be ignored.
+
+This is an example of a @ref@.
+
+This is an example of an iterable: @list.num@ and @list.letter@
+TEMPLATE@@
+
+@@ITERABLES
+@list(num,letter):
+1 a
+2 b
+3 c
+ITERABLES@@
+
+@@REFERENCES
+@ref:
+reference. References are string replacements
+REFERENCES@@
+    """
+
+
 def main():
     Interactive = '-i' in sys.argv
     Test = '-t' in sys.argv
+    if '-p' in sys.argv:
+        PrintExample()
+    if '-h' in [x[:2] for x in sys.argv] or '--help' in sys.argv:
+        print """
+the B Preprocessor
+
+This is a template processor which is designed for preprocessing code templates
+before being compiled. For details https://github.com/JohnFNovak/B_pp
+
+usage: $ B <template1> <template2> <template3> ...
+
+Compiling a template name template.B.ftype will compile to template.ftype
+
+Flags:
+    -i : the template processor will start in interactive mode. The processor
+            will load into an interactive prompt. A python shell can be
+            accessed via a '!' command at the prompt. '?' will print more help
+    -t : the template processor will run in 'test' mode. Templates will not be
+            compiled. Templates will only be checked for valid format. output
+            will only be returned if errors are found. This is useful when
+            batch testing the validity of templates.
+    -p : prints an example template to standard out.
+
+Format:
+    For detailed information go to https://github.com/JohnFNovak/B_pp
+
+    This abridged guide does not address order of operations, multiple level
+        processing, nested templates, or the interactive mode. For information
+        on that, please refer to the online references.
+
+    Templates can contain four types of blocks: GUIDE, ITERABLES, and
+        REFERENCES, TEMPLATE. Each block must begin with a line which says
+        @@NAME and end with a line which says NAME@@ where NAME is one of the
+        four types. In addition to the four block types, files can be included
+        inline.
+
+        File inclusion:
+            Files are treated as strings. File representation is done as
+                %<path_to_file/file.txt>%, where at compilation the contents of
+                file.txt will loaded and %<path_to_file/file.txt>% will be
+                replaced by the file contents. The '%' bookends are defaults,
+                but any string can be used and is defined by the @Fdelimeter
+                option in the GUIDE block (see next).
+
+        GUIDE:
+            The GUIDE block sets compilation options. Currently there are four.
+            These are the current options and their defaults. To set them in a
+            template they must we written @Name = <value> in the guide section.
+                @Passes = 5
+                @Fdelimeter = %
+                @Levelindicator = !
+                @Verbose = 0
+        ITERABLES:
+            Iterables are lists of sets of strings. In the iterables seciton
+            iterables are defined as
+                @Name(prop1, prop2, ...):
+                thing1_prop1 thing1_prop2 ...
+                thing2_prop1 thing2_prop2 ...
+                ...
+            Iterables can be arbitrarily long and can have arbitrarily many
+                properties.
+            When referenced in the TEMPLATE block an iterable is referenced as
+                line in code blah_blah_blah @Name.propname@ continues with code
+            The line will get copied once for each entry in the iterable, and
+                the string @Name.propname@ will be replaced with the value
+                from iterable Name, with property name propname.
+            If an iterable is referenced more than one in a signle line, all of
+                the instances will be replaced at the same time.
+
+                ex:
+                @List(num, letter):
+                5 a
+                6 b
+                7 c
+
+                Then the line:
+                    Test line @List.num@ more filler @List.letter@
+                Will compile to:
+                    Test line 5 more filler a
+                    Test line 6 more filler b
+                    Test line 7 more filler c
+
+            The special iterable @i@ will be replaced by the count of the
+                iteration.
+                With the previous example:
+                    The line:
+                        @i@ Test line @List.num@ more filler @List.letter@
+                    Will compile to:
+                        1 Test line 5 more filler a
+                        2 Test line 6 more filler b
+                        3 Test line 7 more filler c
+
+        REFERENCES:
+            Refernces are strings which are replaced at compilation. Refernces
+            are defined in the REFERENCES block as:
+                @Refname:
+                string to replace
+            Then, any instance of @Refname@ in the TEMPLATE block will compile
+                to "string to replace"
+
+            ex:
+            @ref1:
+            just an example
+
+            Then the line:
+                test line @ref1@ more filler
+            Will compile to:
+                test line just an example more filler
+
+        TEMPLATE:
+            The template block is the part of the template which is compiled
+            into the final result. Refernces and iterables are expanded and the
+            result is printed out to file.
+        """
     if len(sys.argv) > 1:
         for i in [x for x in sys.argv[1:] if x[0] != '-']:
             if Test:
@@ -616,6 +760,8 @@ def main():
                     ProcessInteractive(i)
                 else:
                     Process(i)
+    else:
+        print "No files given. -h or --help flag for help."
 
 if __name__ == '__main__':
     main()
