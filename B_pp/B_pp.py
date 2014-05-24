@@ -462,12 +462,12 @@ def LoadIters(ITERABLES):
     for i in ITERABLES:
         j = [x for x in [y.split('#')[0].strip() for y in i.split('\n')] if x]
         if len(j[0].split('(')[1][:-2].split(',')) == 1:
-            IDict[j[0].split('(')[0]] = [j[0].split('(')[1][:-2].split(
-                                         ','), map(lambda x: [x], j[1:])]
+            IDict[j[0].split('(')[0].strip()] = [j[0].split('(')[1][:-2].split(','),
+                                                 [[x.strip()] for x in j[1:]]]
         else:
-            IDict[j[0].split('(')[0]] = [j[0].split('(')[1][:-2].split(
-                                         ','), map(lambda x: x.split(' '),
-                                         j[1:])]
+            IDict[j[0].split('(')[0].strip()] = [[x.strip() for x in
+                                                  j[0].split('(')[1][:-2].split(',')],
+                                                 [x.split() for x in j[1:]]]
     if Opts['@Verbose'] >= 1:
         print 'Iters:', IDict.keys()
         for i in IDict:
