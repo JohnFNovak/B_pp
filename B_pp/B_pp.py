@@ -201,6 +201,8 @@ def getFile(filename):
 def FormatTest(filename):
     global Opts
     text = getFile(filename)
+    if not text:
+        return False
     Valid = True
 
     key = ['OTHER', 0]
@@ -462,12 +464,12 @@ def LoadIters(ITERABLES):
     for i in ITERABLES:
         j = [x for x in [y.split('#')[0].strip() for y in i.split('\n')] if x]
         if len(j[0].split('(')[1][:-2].split(',')) == 1:
-            IDict[j[0].split('(')[0]] = [j[0].split('(')[1][:-2].split(
-                                         ','), map(lambda x: [x], j[1:])]
+            IDict[j[0].split('(')[0].strip()] = [j[0].split('(')[1][:-2].split(','),
+                                                 [[x.strip()] for x in j[1:]]]
         else:
-            IDict[j[0].split('(')[0]] = [j[0].split('(')[1][:-2].split(
-                                         ','), map(lambda x: x.split(' '),
-                                         j[1:])]
+            IDict[j[0].split('(')[0].strip()] = [[x.strip() for x in
+                                                  j[0].split('(')[1][:-2].split(',')],
+                                                 [x.split() for x in j[1:]]]
     if Opts['@Verbose'] >= 1:
         print 'Iters:', IDict.keys()
         for i in IDict:
@@ -635,7 +637,7 @@ REFERENCES@@
 
 
 def main():
-    Interactive = '-i' in sys.argv
+    Interactive = '-i' in sys.argv or '!' in sys.argv
     Test = '-t' in sys.argv
     if '-p' in sys.argv:
         PrintExample()
@@ -752,7 +754,7 @@ Format:
             result is printed out to file.
         """
     if len(sys.argv) > 1:
-        for i in [x for x in sys.argv[1:] if x[0] != '-']:
+        for i in [x for x in sys.argv[1:] if x[0] != '-' and not x == '!']:
             if Test:
                 FormatTest(i)
             else:
