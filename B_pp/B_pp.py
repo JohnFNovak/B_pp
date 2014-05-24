@@ -201,6 +201,8 @@ def getFile(filename):
 def FormatTest(filename):
     global Opts
     text = getFile(filename)
+    if not text:
+        return False
     Valid = True
 
     key = ['OTHER', 0]
