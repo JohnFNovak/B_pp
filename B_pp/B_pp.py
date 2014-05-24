@@ -635,7 +635,7 @@ REFERENCES@@
 
 
 def main():
-    Interactive = '-i' in sys.argv
+    Interactive = '-i' in sys.argv or '!' in sys.argv
     Test = '-t' in sys.argv
     if '-p' in sys.argv:
         PrintExample()
@@ -752,7 +752,7 @@ Format:
             result is printed out to file.
         """
     if len(sys.argv) > 1:
-        for i in [x for x in sys.argv[1:] if x[0] != '-']:
+        for i in [x for x in sys.argv[1:] if x[0] != '-' and not x == '!']:
             if Test:
                 FormatTest(i)
             else:
